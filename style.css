@@ -227,6 +227,34 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 }
 .btn-ghost:hover { border-color: var(--accent-2); color: var(--accent-2) !important; text-decoration: none; transform: translateY(-2px); }
 
+/* Creates a responsive two-column layout */
+.hero-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3rem; /* Adds breathing room between your text and the photo */
+}
+
+/* Forces the text to take up the left half */
+.hero-content {
+  flex: 1;
+}
+
+/* Forces the image wrapper to take up the right half */
+.hero-image-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end; /* Pushes the image to the far right */
+}
+
+/* Scales the image so it doesn't blow up the screen */
+#hero-img {
+  max-width: 100%;
+  height: auto;
+  max-height: 550px; /* You can tweak this number if the image is too big/small */
+  object-fit: contain;
+}
+
 /* =========================================================
    ABOUT
    ========================================================= */

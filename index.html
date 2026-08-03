@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nagapujitha Karthikeyan</title>
+<meta name="description" content="CS major & aspiring AI engineer — portfolio and journey log.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="#top" class="nav-mark"><span class="dot" aria-hidden="true"></span> puja.dev</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#timeline">Journey</a></li>
+      <li><a href="#skills">Stack</a></li>
+      <li><a href="#works">Works</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#" id="resume-link" class="nav-cta" target="_blank" rel="noopener">Resume ↓</a>
+  </div>
+</nav>
+
+<main id="top">
+
+  <!-- HERO (UPDATED) -->
+  <header class="hero">
+    <div class="wrap hero-layout">
+      <div class="hero-content">
+        <div class="hero-kicker">// currently building toward AI engineering</div>
+        <h1 id="hero-name">Loading…</h1>
+        <p class="hero-sub" id="hero-tagline"></p>
+        <p class="hero-sub" id="hero-subline" style="margin-top:4px; font-family: var(--font-mono); font-size: 14px;"></p>
+        <div class="hero-actions">
+          <a href="#works" class="btn btn-primary">See the work</a>
+          <a href="#" id="resume-link-2" class="btn btn-ghost" target="_blank" rel="noopener">Download résumé</a>
+        </div>
+      </div>
+      <div class="hero-image-wrapper">
+        <img id="hero-img" src="" alt="Nagapujitha Karthikeyan">
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="wrap">
+      <div class="eyebrow">About</div>
+      <h2 id="about-heading" class="section-head"></h2>
+      <div class="about-grid" id="about-grid"></div>
+    </div>
+  </section>
+
+  <!-- TIMELINE / GIT LOG -->
+  <section id="timeline" class="timeline">
+    <div class="wrap">
+      <div class="eyebrow">Journey Log</div>
+      <h2 id="timeline-heading"></h2>
+      <p id="timeline-subheading" style="max-width:520px;"></p>
+      <div class="timeline-branch">branch: <strong id="timeline-branch-name"></strong> · click a commit to expand</div>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <div class="wrap">
+      <div class="eyebrow">Stack</div>
+      <div class="section-head">
+        <h2 id="skills-heading"></h2>
+        <p id="skills-subheading"></p>
+      </div>
+      <div class="skills-grid" id="skills-grid"></div>
+    </div>
+  </section>
+
+  <!-- FEATURED PROJECT -->
+  <section id="featured">
+    <div class="wrap">
+      <div class="eyebrow" id="feature-heading">Featured Build</div>
+      <div class="feature-card">
+        <h3 id="feature-title"></h3>
+        <p id="feature-desc"></p>
+        <div class="feature-stack" id="feature-stack"></div>
+        <a href="#" id="feature-link" class="btn btn-ghost" target="_blank" rel="noopener"></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORKS GALLERY -->
+  <section id="works">
+    <div class="wrap">
+      <div class="eyebrow">Works</div>
+      <div class="section-head">
+        <h2 id="works-heading"></h2>
+        <p id="works-subheading"></p>
+      </div>
+      <div class="works-grid" id="works-grid"></div>
+    </div>
+  </section>
+
+  <!-- LORS -->
+  <section id="lors">
+    <div class="wrap">
+      <div class="eyebrow">Recommendations</div>
+      <h2 id="lors-heading" class="section-head"></h2>
+      <div class="lor-grid" id="lor-grid"></div>
+    </div>
+  </section>
+
+  <!-- ACTIVITIES -->
+  <section id="activities">
+    <div class="wrap">
+      <div class="eyebrow">Activities</div>
+      <h2 id="activities-heading"></h2>
+      <p id="activities-desc" style="max-width: 60ch;"></p>
+      <div class="activities-image">
+        <img id="activities-image" src="" alt="" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <div class="contact-grid">
+        <div>
+          <div class="eyebrow" id="contact-heading">Get In Touch</div>
+          <p id="contact-message"></p>
+        </div>
+        <div class="contact-links">
+          <a href="#" id="contact-email"></a>
+          <a href="#" id="contact-phone"></a>
+          <a href="#" id="contact-linkedin" target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" id="contact-github" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © <span id="year"></span> <span id="footer-name"></span>. Built from scratch, deployed on GitHub Pages.
+</footer>
+
+<!-- LOR MODAL (ADDED HERE) -->
+<div id="lor-modal" class="modal" aria-hidden="true">
+  <div class="modal-content">
+    <span class="close-btn" id="close-modal">&times;</span>
+    <div class="modal-body">
+      <img id="modal-img" src="" alt="LOR Document" loading="lazy">
+      <div class="modal-text-container">
+        <h3 id="modal-name"></h3>
+        <p id="modal-title" class="lor-title"></p>
+        <div id="modal-fulltext"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="content.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

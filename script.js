@@ -369,6 +369,64 @@
     renderCanvas();
   }
 
+  const heroImage = document.getElementById("hero-img");
+  const aboutTarget = document.getElementById("about-profile-target");
+  const aboutSection = document.getElementById("about");
+  const portraitClone = document.createElement("img");
+  portraitClone.id = "portrait-clone";
+  portraitClone.style.position = "fixed";
+  portraitClone.style.pointerEvents = "none";
+  portraitClone.style.transition = "transform 0.7s ease, left 0.7s ease, top 0.7s ease, width 0.7s ease, height 0.7s ease, opacity 0.4s ease";
+  portraitClone.style.opacity = "0";
+  portraitClone.style.zIndex = "21";
+  portraitClone.style.objectFit = "cover";
+  portraitClone.style.borderRadius = "50%";
+  document.body.appendChild(portraitClone);
+
+  let portraitAnimated = false;
+
+  function triggerPortraitMove() {
+    if (portraitAnimated || !heroImage || !aboutTarget || !aboutSection) return;
+    const heroRect = heroImage.getBoundingClientRect();
+    const targetRect = aboutTarget.getBoundingClientRect();
+    portraitClone.src = heroImage.src;
+    portraitClone.style.width = `${heroRect.width}px`;
+    portraitClone.style.height = `${heroRect.height}px`;
+    portraitClone.style.left = `${heroRect.left}px`;
+    portraitClone.style.top = `${heroRect.top}px`;
+    portraitClone.style.opacity = "1";
+    portraitClone.style.borderRadius = getComputedStyle(heroImage).borderRadius || "50%";
+
+    window.requestAnimationFrame(() => {
+      portraitClone.style.left = `${targetRect.left}px`;
+      portraitClone.style.top = `${targetRect.top}px`;
+      portraitClone.style.width = `${targetRect.width}px`;
+      portraitClone.style.height = `${targetRect.height}px`;
+    });
+
+    portraitClone.addEventListener("transitionend", () => {
+      aboutTarget.innerHTML = "";
+      const finalImg = document.createElement("img");
+      finalImg.src = heroImage.src;
+      finalImg.alt = heroImage.alt;
+      finalImg.className = "about-portrait-final";
+      aboutTarget.appendChild(finalImg);
+      portraitClone.style.opacity = "0";
+      portraitAnimated = true;
+    }, { once: true });
+  }
+
+  if (aboutSection && "IntersectionObserver" in window) {
+    const aboutObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.22) {
+          triggerPortraitMove();
+        }
+      });
+    }, { threshold: [0.22] });
+    aboutObserver.observe(aboutSection);
+  }
+
   if (canvas && context) {
     initMotion();
   }

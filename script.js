@@ -314,6 +314,19 @@
     requestAnimationFrame(renderCanvas);
   }
 
+  function applyTiltEffect(element, clientX, clientY, intensity = 8) {
+    const rect = element.getBoundingClientRect();
+    const offsetX = clientX - (rect.left + rect.width / 2);
+    const offsetY = clientY - (rect.top + rect.height / 2);
+    const rotateY = (offsetX / (rect.width / 2)) * intensity;
+    const rotateX = -(offsetY / (rect.height / 2)) * intensity;
+    element.style.transform = `perspective(1100px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  }
+
+  function resetTiltEffect(element) {
+    element.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg)";
+  }
+
   function initMotion() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
@@ -330,6 +343,29 @@
       if (!pointer.active) return;
       spawnParticle(pointer.x + randomBetween(-24, 24), pointer.y + randomBetween(-24, 24));
     }, { passive: true });
+
+    const heroWrapper = document.querySelector(".hero-image-wrapper");
+    if (heroWrapper) {
+      heroWrapper.addEventListener("mousemove", (event) => {
+        applyTiltEffect(heroWrapper, event.clientX, event.clientY, 8);
+      });
+      heroWrapper.addEventListener("mouseleave", () => {
+        resetTiltEffect(heroWrapper);
+      });
+    }
+
+    document.querySelectorAll(".work-card").forEach((card) => {
+      card.addEventListener("mousemove", (event) => {
+        applyTiltEffect(card, event.clientX, event.clientY, 6);
+      });
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "";
+      });
+      card.addEventListener("mouseenter", () => {
+        card.style.transition = "transform 0.18s ease";
+      });
+    });
+
     renderCanvas();
   }
 

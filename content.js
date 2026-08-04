@@ -35,7 +35,7 @@ const SITE_CONTENT = {
     paragraphs: [
       "My journey in computer science has been shaped by a pull toward turning complex ideas into things that actually work. Alongside a 3.906 CGPA, I've stayed hands-on — researching with the Enigma Technical Society and independently building full-stack web applications.",
       "My technical foundation spans C++, Java, Python, Machine Learning, and DBMS, aimed at one goal: becoming an AI engineer who ships. I've applied that foundation in the lab and through active volunteer work with Enigma, the student-led technical and innovation club.",
-      "I'm making the jump to UMass Amherst this fall to keep accelerating that focus on AI — and to start paving the way for my own entrepreneurial path. This site is the log of how I got here."
+      "I'm making the jump to UMass Amherst this fall to keep accelerating that focus on AI. I am ready to start paving the way for my own entrepreneurial path. This site is the log of how I got here."
     ]
   },
 
@@ -51,7 +51,7 @@ const SITE_CONTENT = {
         title: "International Centre for Applied Sciences (ICAS), MAHE",
         subtitle: "Year II · College",
         message: "feat: deepen focus on AI/DL, take on leadership",
-        body: "Diving into AI and Deep Learning electives while channeling leadership as Foreign University Secretary. Kept the creative side alive — sang for the juniors' Reverb — all while working toward a global transfer.",
+        body: "Diving into AI and Deep Learning electives while channeling leadership as Foreign University Secretary. Kept the creative side alive and sang for the juniors' Reverb, all while working toward a global transfer.",
         tags: ["AI", "Deep Learning", "Leadership"]
       },
       {
@@ -60,7 +60,7 @@ const SITE_CONTENT = {
         title: "International Centre for Applied Sciences (ICAS), MAHE",
         subtitle: "Year I · College",
         message: "feat: onboard to college life, take Class Rep role",
-        body: "Earned a 3.86 CGPA while embracing leadership as Class Representative. Stayed involved in campus culture — performed in Reverb/Annual Day, marched in the Independence Day Parade — and mentored incoming students.",
+        body: "Earned a 3.86 CGPA while embracing leadership as Class Representative. Stayed involved in campus culture by performing in Reverb/Annual Day, marched in the Independence Day Parade and mentored incoming students.",
         tags: ["Academics", "Class Representative", "Mentoring"]
       },
       {
@@ -69,7 +69,7 @@ const SITE_CONTENT = {
         title: "Global Indian International School",
         subtitle: "Grade 12",
         message: "fix: lock in on board prep, ship 92.6%",
-        body: "Extreme focus on board preparation, resulting in a 92.6% score. Extended that discipline to helping teachers and classmates — refined the work ethic and self-discipline that carried into university.",
+        body: "Extreme focus on board preparation, resulting in a 92.6% score. Extended that discipline to helping teachers and classmates by refining the work ethic and self-discipline that carried into university.",
         tags: ["Board Exams", "92.6%"]
       },
       {
@@ -78,7 +78,7 @@ const SITE_CONTENT = {
         title: "Global Indian International School",
         subtitle: "Grade 11",
         message: "feat: expand reach — competitions, mentoring, 91.2%",
-        body: "Ranked 15th internationally in IEO and competed in a table tennis tournament, while scoring 91.2% and mentoring peers — reinforcing a commitment to academic excellence and collaboration.",
+        body: "Ranked 15th internationally in IEO and competed in a table tennis tournament, while scoring 91.2% and mentoring peers, thus reinforcing a commitment to academic excellence and collaboration.",
         tags: ["IEO — Rank 15", "91.2%"]
       },
       {
@@ -87,7 +87,7 @@ const SITE_CONTENT = {
         title: "Global Indian International School",
         subtitle: "Grade 10",
         message: "feat: navigate hybrid learning, ship 94.8% + scholarship",
-        body: "Bridged online and offline learning under intense board exam prep. Achieved 94.8% in the final offline boards and secured a merit scholarship — validating consistent effort under pressure.",
+        body: "Bridged online and offline learning under intense board exam prep. Achieved 94.8% in the final offline boards and secured a merit scholarship, thus validating consistent effort under pressure.",
         tags: ["94.8%", "Merit Scholarship"]
       },
       {
@@ -96,7 +96,7 @@ const SITE_CONTENT = {
         title: "Global Indian International School",
         subtitle: "Grade 9",
         message: "fix: adapt to sudden shift to remote learning (COVID-19)",
-        body: "Quickly adapted to e-learning, tackling online exams and pre-board prep through lockdown constraints — staying focused despite limited activities.",
+        body: "Quickly adapted to e-learning, tackling online exams and pre-board prep through lockdown constraints by staying focused despite limited activities.",
         tags: ["Adaptability", "Remote Learning"]
       }
     ]

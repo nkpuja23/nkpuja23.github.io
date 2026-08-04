@@ -26,7 +26,7 @@ const SITE_CONTENT = {
     phone: "+91 636 442 1819",
     linkedin: "https://www.linkedin.com/in/nagapujitha-karthikeyan-225226318",
     github: "https://github.com/nkpuja23",
-    heroImage: "puja-hero-nobg.png" // <-- ADD THIS
+    heroImage: "Site_pic.png" // <-- ADD THIS
   },
 
   // ---------- About section ----------

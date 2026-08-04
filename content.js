@@ -33,8 +33,8 @@ const SITE_CONTENT = {
   about: {
     heading: "About",
     paragraphs: [
-      "My journey in computer science has been shaped by a pull toward turning complex ideas into things that actually work. Alongside a 3.906 CGPA, I've stayed hands-on — researching with the Enigma Technical Society and independently building full-stack web applications.",
-      "My technical foundation spans C++, Java, Python, Machine Learning, and DBMS, aimed at one goal: becoming an AI engineer who ships. I've applied that foundation in the lab and through active volunteer work with Enigma, the student-led technical and innovation club.",
+      "My journey in computer science has been shaped by a pull toward turning complex ideas into things that actually work. Alongside a 3.906 CGPA, I've stayed hands-on — researching with the Enigma Technical Society and independently building full-stack web applications that can scale.",
+      "My technical foundation spans C++, Java, Python, Machine Learning, and DBMS, aimed at one goal: becoming an AI engineer who ships intelligent systems. I've applied that foundation in the lab and through active volunteer work with Enigma, the student-led technical and innovation club.",
       "I'm making the jump to UMass Amherst this fall to keep accelerating that focus on AI. I am ready to start paving the way for my own entrepreneurial path. This site is the log of how I got here."
     ]
   },
@@ -123,7 +123,7 @@ const SITE_CONTENT = {
   featuredProject: {
     heading: "Featured Build",
     title: "Online Doctor Appointment System",
-    description: "A foundational full-stack exercise demonstrating robust proficiency in the PHP and MySQL environment — implementing complex CRUD operations and a secure relational schema for managing patient, doctor, and appointment data.",
+    description: "A foundational full-stack exercise demonstrating robust proficiency in the PHP and MySQL environment — implementing complex CRUD operations and a secure relational schema for managing patient, doctor, and appointment data with product-ready thinking.",
     stack: ["PHP", "MySQL (XAMPP)", "HTML5", "CSS3", "JavaScript"],
     link: "https://github.com/nkpuja23/Online-Doctor-Appointment-System",
     linkLabel: "View source on GitHub"

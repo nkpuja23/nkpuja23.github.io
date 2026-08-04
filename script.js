@@ -196,4 +196,144 @@
   document.querySelectorAll(".commit.reveal").forEach((el, i) => {
     el.style.transitionDelay = Math.min(i * 60, 300) + "ms";
   });
+
+  // ---------- Motion canvas & cursor graphics ----------
+  const canvas = document.getElementById("motion-canvas");
+  const context = canvas ? canvas.getContext("2d") : null;
+  const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, active: false };
+  const particles = [];
+
+  const palette = {
+    accent: [232, 163, 61],
+    accent2: [95, 214, 192],
+    neutral: [255, 255, 255]
+  };
+
+  function resizeCanvas() {
+    if (!canvas || !context) return;
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  }
+
+  function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+  }
+
+  function spawnParticle(x, y) {
+    particles.push({
+      x,
+      y,
+      vx: randomBetween(-0.7, 0.7),
+      vy: randomBetween(-0.7, 0.7),
+      radius: randomBetween(1.5, 4.2),
+      alpha: 1,
+      life: randomBetween(60, 110),
+      hue: randomBetween(176, 214)
+    });
+    if (particles.length > 140) particles.splice(0, particles.length - 140);
+  }
+
+  function drawParticle(p) {
+    context.save();
+    context.globalAlpha = p.alpha * 0.85;
+    const gradient = context.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 5);
+    gradient.addColorStop(0, `rgba(${palette.accent2.join(",")}, 0.9)`);
+    gradient.addColorStop(0.22, `rgba(${palette.accent2.join(",")}, 0.12)`);
+    gradient.addColorStop(1, "transparent");
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.arc(p.x, p.y, p.radius * 5, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+
+    context.beginPath();
+    context.fillStyle = `rgba(${palette.neutral.join(",")}, ${p.alpha})`;
+    context.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    context.fill();
+  }
+
+  function drawNetwork() {
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 110) {
+          context.strokeStyle = `rgba(${palette.accent2.join(",")}, ${0.11 - dist / 900})`;
+          context.lineWidth = 1;
+          context.beginPath();
+          context.moveTo(a.x, a.y);
+          context.lineTo(b.x, b.y);
+          context.stroke();
+        }
+      }
+    }
+  }
+
+  function renderCanvas() {
+    if (!canvas || !context) return;
+    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    context.lineWidth = 1;
+
+    const glow = context.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 240);
+    glow.addColorStop(0, "rgba(95,214,192,0.18)");
+    glow.addColorStop(0.35, "rgba(95,214,192,0.02)");
+    glow.addColorStop(1, "transparent");
+    context.fillStyle = glow;
+    context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+    if (pointer.active) {
+      context.strokeStyle = "rgba(255,255,255,0.08)";
+      context.beginPath();
+      context.arc(pointer.x, pointer.y, 48, 0, Math.PI * 2);
+      context.stroke();
+      context.strokeStyle = "rgba(232,163,61,0.12)";
+      context.beginPath();
+      context.arc(pointer.x, pointer.y, 98, 0, Math.PI * 2);
+      context.stroke();
+    }
+
+    drawNetwork();
+    particles.forEach((p) => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha *= 0.987;
+      p.life -= 1;
+      if (p.life > 0) drawParticle(p);
+    });
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      if (particles[i].life <= 0 || particles[i].alpha <= 0.03) particles.splice(i, 1);
+    }
+
+    requestAnimationFrame(renderCanvas);
+  }
+
+  function initMotion() {
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("mousemove", (event) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.active = true;
+      spawnParticle(pointer.x, pointer.y);
+    });
+    window.addEventListener("mouseleave", () => {
+      pointer.active = false;
+    });
+    document.addEventListener("scroll", () => {
+      if (!pointer.active) return;
+      spawnParticle(pointer.x + randomBetween(-24, 24), pointer.y + randomBetween(-24, 24));
+    }, { passive: true });
+    renderCanvas();
+  }
+
+  if (canvas && context) {
+    initMotion();
+  }
 })();

@@ -155,7 +155,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 #hero-img {
   width: 100%; height: auto; object-fit: cover;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.08); /* Initial border gets killed by GSAP on scroll */
+  border: 3px solid rgba(255,255,255,0.08); 
   box-shadow: 0 30px 70px rgba(0,0,0,0.35);
   position: relative;
   z-index: 50; 
@@ -168,10 +168,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .about-profile-panel { display: flex; justify-content: flex-end; align-items: start; }
 .about-profile-target {
   width: min(100%, 320px); aspect-ratio: 1 / 1; 
-  /* ZERO BORDERS, ZERO BACKGROUND. Perfectly invisible until GSAP image lands */
-  border: none;
-  background: transparent;
-  display: grid; place-items: center;
+  border: none; background: transparent; display: grid; place-items: center;
 }
 .about-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 720px; }
 .about-grid p { font-size: 17px; color: var(--text); }
@@ -214,35 +211,37 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .feature-stack { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 26px; }
 
 /* =========================================================
-   3D WORKS GALLERY
+   3D LORS CAROUSEL & NAVIGATION
    ========================================================= */
-#works { perspective: 2000px; cursor: crosshair; }
-.works-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; transform-style: preserve-3d; position: relative; z-index: 5; }
-.work-card {
-  width: 320px;
-  background: var(--surface);
+.lor-carousel-wrapper { position: relative; }
+.lor-nav-btn {
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transform: translateZ(-200px) rotateY(15deg);
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s, border-color 0.2s;
+  color: var(--text-muted);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
   cursor: pointer;
-}
-.work-card:hover {
-  transform: translateZ(50px) rotateY(0deg) scale(1.05);
-  box-shadow: 0 40px 80px rgba(95, 214, 192, 0.3);
-  border-color: rgba(95, 214, 192, 0.4);
+  transition: all 0.3s ease;
   z-index: 10;
 }
-.work-thumb { aspect-ratio: 16/10; background: var(--surface-2); overflow: hidden; position: relative; }
-.work-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.work-body { padding: 18px 20px 22px; }
-.work-cat { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--accent-2); letter-spacing: 0.05em; }
-.work-title { font-family: var(--font-display); font-size: 18px; margin: 8px 0 6px; }
+.lor-nav-btn:hover {
+  border-color: var(--accent-2);
+  color: var(--accent-2);
+  transform: scale(1.1);
+}
+#lor-prev { position: absolute; left: 0; }
+#lor-next { position: absolute; right: 0; }
+@media (max-width: 768px) {
+  .lor-nav-btn { width: 40px; height: 40px; font-size: 16px; }
+  #lor-prev { left: 10px; }
+  #lor-next { right: 10px; }
+}
 
-/* =========================================================
-   3D LORS CAROUSEL
-   ========================================================= */
 .lor-card {
   position: absolute;
   width: 300px;

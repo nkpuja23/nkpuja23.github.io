@@ -36,12 +36,11 @@
     aboutGrid.appendChild(el);
   });
 
-  // ---------- The Serum-Ad Seamless Image Scrub (Box Fix) ----------
+  // ---------- The Serum-Ad Seamless Image Scrub ----------
   const heroImg = document.getElementById("hero-img");
   const aboutTarget = document.getElementById("about-profile-target");
 
   const buildScrubAnimation = () => {
-    // Force top-left origin so X/Y coordinates map perfectly without offset drift
     gsap.set(heroImg, { transformOrigin: "top left" });
     
     gsap.to(heroImg, {
@@ -57,8 +56,8 @@
       },
       width: () => aboutTarget.getBoundingClientRect().width,
       height: () => aboutTarget.getBoundingClientRect().height,
-      borderRadius: "28px", // Soften edges
-      borderWidth: "0px", // KILLS THE SQUARE BOX
+      borderRadius: "28px", 
+      borderWidth: "0px", 
       boxShadow: "none",
       ease: "none",
       scrollTrigger: {
@@ -129,41 +128,12 @@
   featureLink.href = fp.link;
   featureLink.textContent = fp.linkLabel + " →";
 
-  // ---------- Works gallery (3D Modal Setup) ----------
-  document.getElementById("works-heading").textContent = c.works.heading;
-  document.getElementById("works-subheading").textContent = c.works.subheading;
-  const worksGrid = document.getElementById("works-grid");
-  c.works.items.forEach((w) => {
-    const card = document.createElement("a");
-    card.className = "work-card reveal";
-    if (w.link) card.href = w.link;
-    card.innerHTML = `
-      <div class="work-thumb"><img src="${w.image}" alt="${w.title}" loading="lazy"></div>
-      <div class="work-body"><div class="work-cat">${w.category}</div><div class="work-title">${w.title}</div><p>${w.description}</p></div>
-    `;
-    
-    card.addEventListener('click', (e) => {
-      if(w.link) {
-        e.preventDefault();
-        document.getElementById('works-modal').classList.add('is-open');
-        document.getElementById('works-iframe').src = w.link; 
-      }
-    });
-    worksGrid.appendChild(card);
-  });
-
-  document.getElementById('close-works-modal').addEventListener('click', () => {
-    document.getElementById('works-modal').classList.remove('is-open');
-    document.getElementById('works-iframe').src = "";
-  });
-
-  // ---------- Works Section Click-to-Reveal Polaroid ----------
+  // ---------- Works Section Interactive Canvas ----------
   const worksSection = document.getElementById('works');
-  const worksData = c.works.items; // Pulls from your works array instead of travels
+  const worksData = c.works.items; 
   let globalIndex = 0;
 
   const activatePolaroid = (e, workItem) => {
-    // Create the physical polaroid container
     const polaroid = document.createElement("div");
     polaroid.className = "polaroid-trail";
     
@@ -172,10 +142,19 @@
     polaroid.style.padding = "12px 12px 50px 12px";
     polaroid.style.background = "#f4f4f4";
     polaroid.style.boxShadow = "0 30px 60px rgba(0,0,0,0.5)";
-    polaroid.style.zIndex = "2"; // Drops behind the 3D grid but above the background
-    polaroid.style.pointerEvents = "none"; // Ensures it doesn't block future clicks
+    polaroid.style.zIndex = "2"; 
     
-    // Create the image
+    // Make the generated polaroid clickable to open the iframe modal
+    polaroid.style.pointerEvents = "auto";
+    polaroid.style.cursor = "pointer";
+    polaroid.addEventListener('click', (ev) => {
+      ev.stopPropagation(); // Prevents spawning another polaroid underneath it
+      if(workItem.link) {
+        document.getElementById('works-modal').classList.add('is-open');
+        document.getElementById('works-iframe').src = workItem.link; 
+      }
+    });
+
     const img = document.createElement("img");
     img.src = workItem.image;
     img.style.width = "100%";
@@ -184,7 +163,6 @@
     img.style.display = "block";
     img.style.border = "1px solid rgba(0,0,0,0.1)";
 
-    // Add the title to the bottom of the polaroid
     const title = document.createElement("div");
     title.textContent = workItem.title;
     title.style.color = "#111";
@@ -213,23 +191,25 @@
       polaroid.style.opacity = "1";
     });
 
-    // Stay on screen longer since it's an intentional click
+    // Stays visible for longer so users have time to click it
     setTimeout(() => {
       polaroid.style.opacity = "0";
       setTimeout(() => polaroid.remove(), 600);
-    }, 4500);
+    }, 6000);
   };
 
-  // Trigger on click anywhere in the section
   worksSection.addEventListener('click', (e) => {
-    // Don't spawn a polaroid if they clicked directly on one of the 3D project cards
-    if (e.target.closest('.work-card')) return; 
-    
     activatePolaroid(e, worksData[globalIndex % worksData.length]);
     globalIndex++;
   });
 
-  // ---------- 3D Rotating LORs ----------
+  // Modal close handler for works
+  document.getElementById('close-works-modal').addEventListener('click', () => {
+    document.getElementById('works-modal').classList.remove('is-open');
+    document.getElementById('works-iframe').src = "";
+  });
+
+  // ---------- 3D Rotating LORs with Arrows ----------
   document.getElementById("lors-heading").textContent = c.lors.heading;
   const lorGrid = document.getElementById("lor-grid");
   
@@ -252,6 +232,7 @@
 
   const lorCardsNodes = document.querySelectorAll('.lor-card');
   const radius = window.innerWidth < 768 ? 200 : 380; 
+  const angleStep = 360 / lorCardsNodes.length;
 
   lorCardsNodes.forEach((card, i) => {
     const angle = (i / lorCardsNodes.length) * Math.PI * 2;
@@ -265,15 +246,17 @@
     });
   });
 
-  gsap.to("#lor-grid", {
-    rotationY: 360,
-    ease: "none",
-    scrollTrigger: {
-      trigger: "#lors",
-      start: "top bottom",
-      end: "bottom top",
-      scrub: 1.5
-    }
+  // Arrow Controls Logic
+  let currentLorAngle = 0;
+
+  document.getElementById("lor-prev").addEventListener("click", () => {
+    currentLorAngle += angleStep;
+    gsap.to("#lor-grid", { rotationY: currentLorAngle, duration: 0.8, ease: "power2.out" });
+  });
+
+  document.getElementById("lor-next").addEventListener("click", () => {
+    currentLorAngle -= angleStep;
+    gsap.to("#lor-grid", { rotationY: currentLorAngle, duration: 0.8, ease: "power2.out" });
   });
 
   const lorModal = document.getElementById("lor-modal");

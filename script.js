@@ -384,6 +384,31 @@
   document.body.appendChild(portraitClone);
 
   let portraitAnimated = false;
+  const heroSection = document.querySelector(".hero");
+  let frameRange = { start: 0, end: 0 };
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function updateFrameRange() {
+    if (!heroSection || !aboutSection) return;
+    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+    const startPoint = heroBottom - window.innerHeight * 0.3;
+    const endPoint = aboutSection.offsetTop - window.innerHeight * 0.18;
+    frameRange.start = startPoint;
+    frameRange.end = Math.max(startPoint + 100, endPoint);
+  }
+
+  function updateFrameProgress() {
+    if (!heroSection || !aboutSection) return;
+    const scrollY = window.scrollY;
+    const progress = clamp((scrollY - frameRange.start) / (frameRange.end - frameRange.start), 0, 1);
+    document.documentElement.style.setProperty("--frame-progress", progress.toFixed(3));
+    if (progress > 0.62 && !portraitAnimated) {
+      triggerPortraitMove();
+    }
+  }
 
   function triggerPortraitMove() {
     if (portraitAnimated || !heroImage || !aboutTarget || !aboutSection) return;
@@ -426,6 +451,11 @@
     }, { threshold: [0.22] });
     aboutObserver.observe(aboutSection);
   }
+
+  updateFrameRange();
+  updateFrameProgress();
+  window.addEventListener("resize", updateFrameRange);
+  window.addEventListener("scroll", updateFrameProgress, { passive: true });
 
   if (canvas && context) {
     initMotion();

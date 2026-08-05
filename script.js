@@ -1,17 +1,28 @@
 /**
- * Renders every section from content.js and wires up interactions.
- * You should not need to edit this file to update your content —
- * edit content.js instead.
+ * Renders every section from content.js and handles the GSAP/Lenis Motion Engine.
  */
 (function () {
   const c = SITE_CONTENT;
 
-  // ---------- Hero ----------
+  // ---------- GSAP & Lenis Setup ----------
+  gsap.registerPlugin(ScrollTrigger);
+
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smooth: true,
+  });
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // ---------- DOM Population (Hero & Basic Data) ----------
   document.getElementById("hero-name").textContent = c.identity.name;
   document.getElementById("hero-tagline").textContent = c.identity.tagline;
   document.getElementById("hero-subline").textContent = c.identity.subline;
   document.getElementById("resume-link").href = c.identity.resumeLink;
-  document.getElementById("hero-img").src = c.identity.heroImage;
   const resumeLink2 = document.getElementById("resume-link-2");
   if (resumeLink2) resumeLink2.href = c.identity.resumeLink;
   document.title = c.identity.name + " — " + c.identity.tagline;
@@ -25,43 +36,70 @@
     aboutGrid.appendChild(el);
   });
 
+  // ---------- The Serum-Ad Seamless Image Scrub ----------
+  const heroImg = document.getElementById("hero-img");
+  const aboutTarget = document.getElementById("about-profile-target");
+
+  const buildScrubAnimation = () => {
+    // Reset transforms to measure correctly
+    gsap.set(heroImg, { clearProps: "all" });
+    
+    const targetRect = aboutTarget.getBoundingClientRect();
+    const heroRect = heroImg.getBoundingClientRect();
+
+    const scaleX = targetRect.width / heroRect.width;
+    const scaleY = targetRect.height / heroRect.height;
+    
+    // Animate across DOM nodes visually
+    gsap.to(heroImg, {
+      x: targetRect.left - heroRect.left,
+      y: targetRect.top - heroRect.top,
+      scaleX: scaleX,
+      scaleY: scaleY,
+      borderRadius: "28px", // Morphs from circle
+      borderWidth: "1px",
+      borderColor: "rgba(255,255,255,0.2)",
+      boxShadow: "none",
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        endTrigger: "#about",
+        end: "center center",
+        scrub: 1, // Binds strictly to smooth scroll position
+        invalidateOnRefresh: true // Recalculates on resize
+      }
+    });
+  };
+  
+  // Wait for images to load before measuring bounds
+  window.onload = buildScrubAnimation;
+  window.addEventListener("resize", () => {
+    ScrollTrigger.refresh();
+  });
+
   // ---------- Timeline (git log) ----------
   document.getElementById("timeline-heading").textContent = c.timeline.heading;
   document.getElementById("timeline-subheading").textContent = c.timeline.subheading;
   document.getElementById("timeline-branch-name").textContent = c.timeline.branch;
-
   const log = document.getElementById("log");
   c.timeline.entries.forEach((entry, i) => {
     const commit = document.createElement("div");
     commit.className = "commit reveal";
-
     commit.innerHTML = `
       <span class="commit-node" aria-hidden="true"></span>
       <button class="commit-row" aria-expanded="false">
-        <span class="commit-meta">
-          <span class="commit-hash">${entry.hash}</span>
-          <span>·</span>
-          <span>${entry.date}</span>
-        </span>
+        <span class="commit-meta"><span class="commit-hash">${entry.hash}</span><span>·</span><span>${entry.date}</span></span>
         <span class="commit-message">${entry.message}</span>
         <span class="commit-title">${entry.title} — ${entry.subtitle}</span>
       </button>
-      <div class="commit-detail">
-        <div class="commit-detail-inner">
-          <p>${entry.body}</p>
-          <div class="commit-tags">
-            ${entry.tags.map((t) => `<span class="tag">${t}</span>`).join("")}
-          </div>
-        </div>
-      </div>
+      <div class="commit-detail"><div class="commit-detail-inner"><p>${entry.body}</p><div class="commit-tags">${entry.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div></div></div>
     `;
-
     const row = commit.querySelector(".commit-row");
     row.addEventListener("click", () => {
       const isOpen = commit.classList.toggle("is-open");
       row.setAttribute("aria-expanded", String(isOpen));
     });
-
     log.appendChild(commit);
   });
 
@@ -72,11 +110,7 @@
   c.skills.items.forEach((s) => {
     const card = document.createElement("div");
     card.className = "skill-card";
-    card.innerHTML = `
-      <div class="skill-cat">${s.category}</div>
-      <div class="skill-name">${s.name}</div>
-      <p>${s.description}</p>
-    `;
+    card.innerHTML = `<div class="skill-cat">${s.category}</div><div class="skill-name">${s.name}</div><p>${s.description}</p>`;
     skillsGrid.appendChild(card);
   });
 
@@ -96,49 +130,82 @@
   featureLink.href = fp.link;
   featureLink.textContent = fp.linkLabel + " →";
 
-  // ---------- Works gallery ----------
+  // ---------- Works gallery (3D Modal Setup) ----------
   document.getElementById("works-heading").textContent = c.works.heading;
   document.getElementById("works-subheading").textContent = c.works.subheading;
   const worksGrid = document.getElementById("works-grid");
   c.works.items.forEach((w) => {
-    const card = document.createElement(w.link ? "a" : "div");
+    // Replaced standard anchor wrapping to intercept clicks for iframe injection
+    const card = document.createElement("a");
     card.className = "work-card reveal";
-    if (w.link) { card.href = w.link; card.target = "_blank"; card.rel = "noopener"; }
+    if (w.link) card.href = w.link;
     card.innerHTML = `
       <div class="work-thumb"><img src="${w.image}" alt="${w.title}" loading="lazy"></div>
-      <div class="work-body">
-        <div class="work-cat">${w.category}</div>
-        <div class="work-title">${w.title}</div>
-        <p>${w.description}</p>
-      </div>
+      <div class="work-body"><div class="work-cat">${w.category}</div><div class="work-title">${w.title}</div><p>${w.description}</p></div>
     `;
+    
+    card.addEventListener('click', (e) => {
+      if(w.link) {
+        e.preventDefault();
+        document.getElementById('works-modal').classList.add('is-open');
+        document.getElementById('works-iframe').src = w.link; // Load full page into frame
+      }
+    });
     worksGrid.appendChild(card);
   });
 
-  // ---------- LORs ----------
+  document.getElementById('close-works-modal').addEventListener('click', () => {
+    document.getElementById('works-modal').classList.remove('is-open');
+    document.getElementById('works-iframe').src = "";
+  });
+
+  // ---------- 3D Rotating LORs ----------
   document.getElementById("lors-heading").textContent = c.lors.heading;
   const lorGrid = document.getElementById("lor-grid");
   
   c.lors.items.forEach((l) => {
     const card = document.createElement("div");
-    card.className = "lor-card reveal";
+    card.className = "lor-card";
     card.innerHTML = `
-      <div class="lor-thumb"><img src="${l.image}" alt="Letter of recommendation from ${l.name}" loading="lazy"></div>
-      <div class="lor-body">
-        <div class="lor-name">${l.name}</div>
-        <p class="lor-title">${l.title}</p>
-      </div>
+      <div class="lor-thumb"><img src="${l.image}" alt="${l.name}" loading="lazy"></div>
+      <div class="lor-body"><div class="lor-name">${l.name}</div><p class="lor-title">${l.title}</p></div>
     `;
-
-     card.addEventListener("click", () => {
+    card.addEventListener("click", () => {
       document.getElementById("lor-modal").classList.add("is-open");
       document.getElementById("modal-img").src = l.image;
       document.getElementById("modal-name").textContent = l.name;
       document.getElementById("modal-title").textContent = l.title;
       document.getElementById("modal-fulltext").textContent = l.fullText || "";
     });
-
     lorGrid.appendChild(card);
+  });
+
+  // Calculate 3D Ring placement
+  const lorCardsNodes = document.querySelectorAll('.lor-card');
+  const radius = window.innerWidth < 768 ? 200 : 380; 
+
+  lorCardsNodes.forEach((card, i) => {
+    const angle = (i / lorCardsNodes.length) * Math.PI * 2;
+    const x = Math.sin(angle) * radius;
+    const z = Math.cos(angle) * radius;
+    
+    gsap.set(card, {
+      x: x,
+      z: z,
+      rotationY: (angle * 180 / Math.PI)
+    });
+  });
+
+  // Bind ring rotation to scroll
+  gsap.to("#lor-grid", {
+    rotationY: 360,
+    ease: "none",
+    scrollTrigger: {
+      trigger: "#lors",
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 1.5
+    }
   });
 
   const lorModal = document.getElementById("lor-modal");
@@ -147,16 +214,69 @@
   });
   window.addEventListener("click", (e) => {
     if (e.target === lorModal) lorModal.classList.remove("is-open");
+    if (e.target === document.getElementById('works-modal')) {
+      document.getElementById('works-modal').classList.remove('is-open');
+      document.getElementById('works-iframe').src = "";
+    }
   });
 
-  // ---------- Activities ----------
+  // ---------- Polaroid Travel Trail ----------
+  const travelSection = document.getElementById('travels');
+  const travelImages = c.travels.images; // Pulling cleanly from content.js
+  let globalIndex = 0;
+  let last = { x: 0, y: 0 };
+
+  const activatePolaroid = (e, imageSrc) => {
+    const polaroid = document.createElement("img");
+    polaroid.src = imageSrc;
+    polaroid.className = "polaroid-trail";
+    
+    polaroid.style.position = "absolute";
+    polaroid.style.width = "220px";
+    polaroid.style.height = "260px";
+    polaroid.style.objectFit = "cover";
+    polaroid.style.padding = "10px 10px 45px 10px";
+    polaroid.style.background = "#fff";
+    polaroid.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)";
+    
+    // Adjust based on section bounding rect so coordinates map cleanly inside
+    const rect = travelSection.getBoundingClientRect();
+    polaroid.style.left = `${e.clientX - rect.left}px`;
+    polaroid.style.top = `${e.clientY - rect.top}px`;
+    
+    const rotation = Math.random() * 40 - 20;
+    polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0.4)`;
+    polaroid.style.opacity = "0";
+    polaroid.style.transition = "transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s";
+    
+    travelSection.appendChild(polaroid);
+
+    requestAnimationFrame(() => {
+      polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
+      polaroid.style.opacity = "1";
+    });
+
+    setTimeout(() => {
+      polaroid.style.opacity = "0";
+      setTimeout(() => polaroid.remove(), 500);
+    }, 2200);
+  };
+
+  travelSection.addEventListener('mousemove', (e) => {
+    const distance = Math.hypot(e.clientX - last.x, e.clientY - last.y);
+    if (distance > 120) {
+      last = { x: e.clientX, y: e.clientY };
+      activatePolaroid(e, travelImages[globalIndex % travelImages.length]);
+      globalIndex++;
+    }
+  });
+
+  // ---------- Activities & Contact ----------
   document.getElementById("activities-heading").textContent = c.activities.heading;
   document.getElementById("activities-desc").textContent = c.activities.description;
   const actImg = document.getElementById("activities-image");
   actImg.src = c.activities.image;
-  actImg.alt = "Activity board";
 
-  // ---------- Contact ----------
   document.getElementById("contact-heading").textContent = c.contact.heading;
   document.getElementById("contact-message").textContent = c.contact.message;
   const emailLink = document.getElementById("contact-email");
@@ -169,45 +289,34 @@
   linkedinLink.href = c.identity.linkedin;
   const githubLink = document.getElementById("contact-github");
   githubLink.href = c.identity.github;
-
   document.getElementById("footer-name").textContent = c.identity.shortName;
   document.getElementById("year").textContent = new Date().getFullYear();
 
-  // ---------- Scroll reveal ----------
+  // ---------- Standard Scroll Reveal Observer (For Git Log) ----------
   const revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
+    const io = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
             io.unobserve(entry.target);
           }
         });
-      },
-      { threshold: 0.12 }
-    );
+      }, { threshold: 0.12 });
     revealEls.forEach((el) => io.observe(el));
   } else {
     revealEls.forEach((el) => el.classList.add("is-visible"));
   }
-
-  // Stagger the timeline commits slightly for a nicer cascade
   document.querySelectorAll(".commit.reveal").forEach((el, i) => {
     el.style.transitionDelay = Math.min(i * 60, 300) + "ms";
   });
 
-  // ---------- Motion canvas & cursor graphics ----------
+  // Background Motion Canvas Network logic
   const canvas = document.getElementById("motion-canvas");
   const context = canvas ? canvas.getContext("2d") : null;
   const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, active: false };
   const particles = [];
-
-  const palette = {
-    accent: [232, 163, 61],
-    accent2: [95, 214, 192],
-    neutral: [255, 255, 255]
-  };
+  const palette = { accent2: [95, 214, 192], neutral: [255, 255, 255] };
 
   function resizeCanvas() {
     if (!canvas || !context) return;
@@ -218,246 +327,63 @@
     context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
   }
 
-  function randomBetween(min, max) {
-    return min + Math.random() * (max - min);
-  }
-
+  function randomBetween(min, max) { return min + Math.random() * (max - min); }
   function spawnParticle(x, y) {
-    particles.push({
-      x,
-      y,
-      vx: randomBetween(-0.7, 0.7),
-      vy: randomBetween(-0.7, 0.7),
-      radius: randomBetween(1.5, 4.2),
-      alpha: 1,
-      life: randomBetween(60, 110),
-      hue: randomBetween(176, 214)
-    });
+    particles.push({ x, y, vx: randomBetween(-0.7, 0.7), vy: randomBetween(-0.7, 0.7), radius: randomBetween(1.5, 4.2), alpha: 1, life: randomBetween(60, 110) });
     if (particles.length > 140) particles.splice(0, particles.length - 140);
-  }
-
-  function drawParticle(p) {
-    context.save();
-    context.globalAlpha = p.alpha * 0.85;
-    const gradient = context.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 5);
-    gradient.addColorStop(0, `rgba(${palette.accent2.join(",")}, 0.9)`);
-    gradient.addColorStop(0.22, `rgba(${palette.accent2.join(",")}, 0.12)`);
-    gradient.addColorStop(1, "transparent");
-    context.fillStyle = gradient;
-    context.beginPath();
-    context.arc(p.x, p.y, p.radius * 5, 0, Math.PI * 2);
-    context.fill();
-    context.restore();
-
-    context.beginPath();
-    context.fillStyle = `rgba(${palette.neutral.join(",")}, ${p.alpha})`;
-    context.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  function drawNetwork() {
-    for (let i = 0; i < particles.length; i++) {
-      const a = particles[i];
-      for (let j = i + 1; j < particles.length; j++) {
-        const b = particles[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 110) {
-          context.strokeStyle = `rgba(${palette.accent2.join(",")}, ${0.11 - dist / 900})`;
-          context.lineWidth = 1;
-          context.beginPath();
-          context.moveTo(a.x, a.y);
-          context.lineTo(b.x, b.y);
-          context.stroke();
-        }
-      }
-    }
   }
 
   function renderCanvas() {
     if (!canvas || !context) return;
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    context.lineWidth = 1;
-
     const glow = context.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 240);
     glow.addColorStop(0, "rgba(95,214,192,0.18)");
     glow.addColorStop(0.35, "rgba(95,214,192,0.02)");
     glow.addColorStop(1, "transparent");
     context.fillStyle = glow;
     context.fillRect(0, 0, window.innerWidth, window.innerHeight);
-
-    if (pointer.active) {
-      context.strokeStyle = "rgba(255,255,255,0.08)";
-      context.beginPath();
-      context.arc(pointer.x, pointer.y, 48, 0, Math.PI * 2);
-      context.stroke();
-      context.strokeStyle = "rgba(232,163,61,0.12)";
-      context.beginPath();
-      context.arc(pointer.x, pointer.y, 98, 0, Math.PI * 2);
-      context.stroke();
+    
+    for (let i = 0; i < particles.length; i++) {
+      const a = particles[i];
+      for (let j = i + 1; j < particles.length; j++) {
+        const b = particles[j];
+        const dist = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        if (dist < 110) {
+          context.strokeStyle = `rgba(${palette.accent2.join(",")}, ${0.11 - dist / 900})`;
+          context.lineWidth = 1;
+          context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke();
+        }
+      }
     }
-
-    drawNetwork();
+    
     particles.forEach((p) => {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.alpha *= 0.987;
-      p.life -= 1;
-      if (p.life > 0) drawParticle(p);
+      p.x += p.vx; p.y += p.vy; p.alpha *= 0.987; p.life -= 1;
+      if (p.life > 0) {
+        context.beginPath();
+        context.fillStyle = `rgba(${palette.neutral.join(",")}, ${p.alpha})`;
+        context.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        context.fill();
+      }
     });
 
     for (let i = particles.length - 1; i >= 0; i--) {
       if (particles[i].life <= 0 || particles[i].alpha <= 0.03) particles.splice(i, 1);
     }
-
     requestAnimationFrame(renderCanvas);
   }
 
-  function applyTiltEffect(element, clientX, clientY, intensity = 8) {
-    const rect = element.getBoundingClientRect();
-    const offsetX = clientX - (rect.left + rect.width / 2);
-    const offsetY = clientY - (rect.top + rect.height / 2);
-    const rotateY = (offsetX / (rect.width / 2)) * intensity;
-    const rotateX = -(offsetY / (rect.height / 2)) * intensity;
-    element.style.transform = `perspective(1100px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  }
-
-  function resetTiltEffect(element) {
-    element.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg)";
-  }
-
-  function initMotion() {
+  if (canvas && context) {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("mousemove", (event) => {
-      pointer.x = event.clientX;
-      pointer.y = event.clientY;
-      pointer.active = true;
+      pointer.x = event.clientX; pointer.y = event.clientY; pointer.active = true;
       spawnParticle(pointer.x, pointer.y);
     });
-    window.addEventListener("mouseleave", () => {
-      pointer.active = false;
-    });
+    window.addEventListener("mouseleave", () => { pointer.active = false; });
     document.addEventListener("scroll", () => {
       if (!pointer.active) return;
       spawnParticle(pointer.x + randomBetween(-24, 24), pointer.y + randomBetween(-24, 24));
     }, { passive: true });
-
-    const heroWrapper = document.querySelector(".hero-image-wrapper");
-    if (heroWrapper) {
-      heroWrapper.addEventListener("mousemove", (event) => {
-        applyTiltEffect(heroWrapper, event.clientX, event.clientY, 8);
-      });
-      heroWrapper.addEventListener("mouseleave", () => {
-        resetTiltEffect(heroWrapper);
-      });
-    }
-
-    document.querySelectorAll(".work-card").forEach((card) => {
-      card.addEventListener("mousemove", (event) => {
-        applyTiltEffect(card, event.clientX, event.clientY, 6);
-      });
-      card.addEventListener("mouseleave", () => {
-        card.style.transform = "";
-      });
-      card.addEventListener("mouseenter", () => {
-        card.style.transition = "transform 0.18s ease";
-      });
-    });
-
     renderCanvas();
-  }
-
-  const heroImage = document.getElementById("hero-img");
-  const aboutTarget = document.getElementById("about-profile-target");
-  const aboutSection = document.getElementById("about");
-  const portraitClone = document.createElement("img");
-  portraitClone.id = "portrait-clone";
-  portraitClone.style.position = "fixed";
-  portraitClone.style.pointerEvents = "none";
-  portraitClone.style.transition = "transform 0.7s ease, left 0.7s ease, top 0.7s ease, width 0.7s ease, height 0.7s ease, opacity 0.4s ease";
-  portraitClone.style.opacity = "0";
-  portraitClone.style.zIndex = "21";
-  portraitClone.style.objectFit = "cover";
-  portraitClone.style.borderRadius = "50%";
-  document.body.appendChild(portraitClone);
-
-  let portraitAnimated = false;
-  const heroSection = document.querySelector(".hero");
-  let frameRange = { start: 0, end: 0 };
-
-  function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, value));
-  }
-
-  function updateFrameRange() {
-    if (!heroSection || !aboutSection) return;
-    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-    const startPoint = heroBottom - window.innerHeight * 0.3;
-    const endPoint = aboutSection.offsetTop - window.innerHeight * 0.18;
-    frameRange.start = startPoint;
-    frameRange.end = Math.max(startPoint + 100, endPoint);
-  }
-
-  function updateFrameProgress() {
-    if (!heroSection || !aboutSection) return;
-    const scrollY = window.scrollY;
-    const progress = clamp((scrollY - frameRange.start) / (frameRange.end - frameRange.start), 0, 1);
-    document.documentElement.style.setProperty("--frame-progress", progress.toFixed(3));
-    if (progress > 0.62 && !portraitAnimated) {
-      triggerPortraitMove();
-    }
-  }
-
-  function triggerPortraitMove() {
-    if (portraitAnimated || !heroImage || !aboutTarget || !aboutSection) return;
-    const heroRect = heroImage.getBoundingClientRect();
-    const targetRect = aboutTarget.getBoundingClientRect();
-    portraitClone.src = heroImage.src;
-    portraitClone.style.width = `${heroRect.width}px`;
-    portraitClone.style.height = `${heroRect.height}px`;
-    portraitClone.style.left = `${heroRect.left}px`;
-    portraitClone.style.top = `${heroRect.top}px`;
-    portraitClone.style.opacity = "1";
-    portraitClone.style.borderRadius = getComputedStyle(heroImage).borderRadius || "50%";
-
-    window.requestAnimationFrame(() => {
-      portraitClone.style.left = `${targetRect.left}px`;
-      portraitClone.style.top = `${targetRect.top}px`;
-      portraitClone.style.width = `${targetRect.width}px`;
-      portraitClone.style.height = `${targetRect.height}px`;
-    });
-
-    portraitClone.addEventListener("transitionend", () => {
-      aboutTarget.innerHTML = "";
-      const finalImg = document.createElement("img");
-      finalImg.src = heroImage.src;
-      finalImg.alt = heroImage.alt;
-      finalImg.className = "about-portrait-final";
-      aboutTarget.appendChild(finalImg);
-      portraitClone.style.opacity = "0";
-      portraitAnimated = true;
-    }, { once: true });
-  }
-
-  if (aboutSection && "IntersectionObserver" in window) {
-    const aboutObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.22) {
-          triggerPortraitMove();
-        }
-      });
-    }, { threshold: [0.22] });
-    aboutObserver.observe(aboutSection);
-  }
-
-  updateFrameRange();
-  updateFrameProgress();
-  window.addEventListener("resize", updateFrameRange);
-  window.addEventListener("scroll", updateFrameProgress, { passive: true });
-
-  if (canvas && context) {
-    initMotion();
   }
 })();

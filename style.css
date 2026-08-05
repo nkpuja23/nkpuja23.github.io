@@ -30,7 +30,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: auto; /* Disabled for Lenis to take over smoothly */ }
+html { scroll-behavior: auto; /* Disabled for Lenis */ }
 
 body {
   margin: 0;
@@ -126,13 +126,13 @@ p { color: var(--text-muted); margin: 0 0 1em; }
    ========================================================= */
 .hero {
   padding-top: clamp(72px, 14vw, 140px); padding-bottom: clamp(56px, 10vw, 96px);
-  position: relative; overflow: hidden; z-index: 1;
+  position: relative; overflow: visible; z-index: 10; /* Fixed to allow image escape */
 }
 .hero::before {
   content: ""; position: absolute; top: -20%; right: -10%;
   width: 560px; height: 560px;
   background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
-  pointer-events: none;
+  pointer-events: none; z-index: -1;
 }
 .hero-chip { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px; margin-bottom: 22px; border-radius: 999px; border: 1px solid rgba(95, 214, 192, 0.18); background: rgba(40, 44, 58, 0.55); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--accent-2); text-transform: uppercase; width: fit-content; }
 .hero-kicker { font-family: var(--font-mono); color: var(--accent-2); font-size: 14px; margin-bottom: 18px; }
@@ -149,17 +149,16 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .hero-layout { display: flex; align-items: center; justify-content: space-between; gap: 60px; transform-style: preserve-3d; }
 .hero-content { flex: 1.2; }
 .hero-image-wrapper {
-  flex: 1; max-width: 420px; transform-style: preserve-3d; perspective: 1100px;
+  flex: 1; max-width: 420px;
 }
 
-/* Base style for hero-img before GSAP hijacking */
 #hero-img {
   width: 100%; height: auto; object-fit: cover;
   border-radius: 50%;
   border: 3px solid rgba(255,255,255,0.08);
   box-shadow: 0 30px 70px rgba(0,0,0,0.35);
   position: relative;
-  z-index: 20;
+  z-index: 50; /* Needs to float above other sections during transition */
 }
 
 /* =========================================================
@@ -168,9 +167,8 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .about-section-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr); gap: 32px; align-items: start; }
 .about-profile-panel { display: flex; justify-content: flex-end; align-items: start; }
 .about-profile-target {
-  width: min(100%, 320px); aspect-ratio: 1 / 1; border-radius: 28px;
-  background: transparent;
-  border: 1px dashed rgba(255,255,255,0.2);
+  width: min(100%, 320px); aspect-ratio: 1 / 1; 
+  /* Removed border and background so it is completely invisible */
   display: grid; place-items: center;
 }
 .about-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 720px; }
@@ -214,10 +212,10 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .feature-stack { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 26px; }
 
 /* =========================================================
-   3D WORKS GALLERY (NEW)
+   3D WORKS GALLERY
    ========================================================= */
-#works { perspective: 2000px; overflow: hidden; }
-.works-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; transform-style: preserve-3d; }
+#works { perspective: 2000px; }
+.works-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; transform-style: preserve-3d; position: relative; z-index: 5; }
 .work-card {
   width: 320px;
   background: var(--surface);
@@ -241,7 +239,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .work-title { font-family: var(--font-display); font-size: 18px; margin: 8px 0 6px; }
 
 /* =========================================================
-   3D LORS CAROUSEL (NEW)
+   3D LORS CAROUSEL
    ========================================================= */
 .lor-card {
   position: absolute;
@@ -251,7 +249,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s linear; /* Rotation handled via JS, hover scale here */
+  transition: border-color 0.2s ease, transform 0.2s linear; 
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .lor-card:hover { border-color: var(--accent); }

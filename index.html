@@ -29,7 +29,6 @@
       <li><a href="#timeline">Journey</a></li>
       <li><a href="#skills">Stack</a></li>
       <li><a href="#works">Works</a></li>
-      <li><a href="#travels">Wanderlust</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <a href="#" id="resume-link" class="nav-cta" target="_blank" rel="noopener">Resume ↓</a>
@@ -66,7 +65,7 @@
       </div>
       <div class="about-profile-panel">
         <div class="about-profile-target" id="about-profile-target" aria-hidden="true">
-          <!-- Image will morph into here via GSAP -->
+          <!-- Invisible placeholder for GSAP target -->
         </div>
       </div>
     </div>
@@ -108,8 +107,8 @@
     </div>
   </section>
 
-  <!-- WORKS GALLERY (3D) -->
-  <section id="works">
+  <!-- WORKS GALLERY (3D + Polaroid Cursor) -->
+  <section id="works" style="position: relative; overflow: hidden; padding-bottom: 150px;">
     <div class="wrap">
       <div class="eyebrow">Works</div>
       <div class="section-head">
@@ -118,11 +117,6 @@
       </div>
       <div class="works-grid" id="works-grid"></div>
     </div>
-  </section>
-
-  <!-- TRAVEL POLAROID TRAIL -->
-  <section id="travels" style="height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--surface);">
-    <h2 style="opacity: 0.2; font-size: clamp(30px, 6vw, 80px); pointer-events: none; font-family: var(--font-display);">DRAG TO UNPACK GLOBE</h2>
   </section>
 
   <!-- LORS (Rotating 3D Ring) -->

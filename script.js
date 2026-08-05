@@ -18,7 +18,7 @@
   }
   requestAnimationFrame(raf);
 
-  // ---------- DOM Population (Hero & Basic Data) ----------
+  // ---------- DOM Population ----------
   document.getElementById("hero-name").textContent = c.identity.name;
   document.getElementById("hero-tagline").textContent = c.identity.tagline;
   document.getElementById("hero-subline").textContent = c.identity.subline;
@@ -36,43 +36,43 @@
     aboutGrid.appendChild(el);
   });
 
-  // ---------- The Serum-Ad Seamless Image Scrub ----------
+  // ---------- The Serum-Ad Seamless Image Scrub (Fixed Math) ----------
   const heroImg = document.getElementById("hero-img");
   const aboutTarget = document.getElementById("about-profile-target");
 
   const buildScrubAnimation = () => {
-    // Reset transforms to measure correctly
-    gsap.set(heroImg, { clearProps: "all" });
+    // Ensure transform origins are top left for accurate coordinate mapping
+    gsap.set(heroImg, { transformOrigin: "top left" });
     
-    const targetRect = aboutTarget.getBoundingClientRect();
-    const heroRect = heroImg.getBoundingClientRect();
-
-    const scaleX = targetRect.width / heroRect.width;
-    const scaleY = targetRect.height / heroRect.height;
-    
-    // Animate across DOM nodes visually
     gsap.to(heroImg, {
-      x: targetRect.left - heroRect.left,
-      y: targetRect.top - heroRect.top,
-      scaleX: scaleX,
-      scaleY: scaleY,
-      borderRadius: "28px", // Morphs from circle
+      x: () => {
+        const targetRect = aboutTarget.getBoundingClientRect();
+        const startRect = heroImg.parentElement.getBoundingClientRect();
+        return targetRect.left - startRect.left;
+      },
+      y: () => {
+        const targetRect = aboutTarget.getBoundingClientRect();
+        const startRect = heroImg.parentElement.getBoundingClientRect();
+        return targetRect.top - startRect.top;
+      },
+      width: () => aboutTarget.getBoundingClientRect().width,
+      height: () => aboutTarget.getBoundingClientRect().height,
+      borderRadius: "28px", // Morph from circle to soft rectangle
       borderWidth: "1px",
       borderColor: "rgba(255,255,255,0.2)",
       boxShadow: "none",
       ease: "none",
       scrollTrigger: {
-        trigger: ".hero",
+        trigger: "body", // Absolute page scroll tracking
         start: "top top",
         endTrigger: "#about",
         end: "center center",
-        scrub: 1, // Binds strictly to smooth scroll position
-        invalidateOnRefresh: true // Recalculates on resize
+        scrub: 1, 
+        invalidateOnRefresh: true 
       }
     });
   };
   
-  // Wait for images to load before measuring bounds
   window.onload = buildScrubAnimation;
   window.addEventListener("resize", () => {
     ScrollTrigger.refresh();
@@ -135,7 +135,6 @@
   document.getElementById("works-subheading").textContent = c.works.subheading;
   const worksGrid = document.getElementById("works-grid");
   c.works.items.forEach((w) => {
-    // Replaced standard anchor wrapping to intercept clicks for iframe injection
     const card = document.createElement("a");
     card.className = "work-card reveal";
     if (w.link) card.href = w.link;
@@ -148,7 +147,7 @@
       if(w.link) {
         e.preventDefault();
         document.getElementById('works-modal').classList.add('is-open');
-        document.getElementById('works-iframe').src = w.link; // Load full page into frame
+        document.getElementById('works-iframe').src = w.link; 
       }
     });
     worksGrid.appendChild(card);
@@ -157,6 +156,58 @@
   document.getElementById('close-works-modal').addEventListener('click', () => {
     document.getElementById('works-modal').classList.remove('is-open');
     document.getElementById('works-iframe').src = "";
+  });
+
+  // ---------- Works Section Polaroid Cursor Trail (Re-routed) ----------
+  const worksSection = document.getElementById('works');
+  const travelImages = c.travels.images; 
+  let globalIndex = 0;
+  let last = { x: 0, y: 0 };
+
+  const activatePolaroid = (e, imageSrc) => {
+    const polaroid = document.createElement("img");
+    polaroid.src = imageSrc;
+    polaroid.className = "polaroid-trail";
+    
+    polaroid.style.position = "absolute";
+    polaroid.style.width = "220px";
+    polaroid.style.height = "260px";
+    polaroid.style.objectFit = "cover";
+    polaroid.style.padding = "10px 10px 45px 10px";
+    polaroid.style.background = "#fff";
+    polaroid.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)";
+    polaroid.style.zIndex = "2"; // Underneath the works cards but above background
+    
+    // Map absolute mouse position strictly to the works block
+    const rect = worksSection.getBoundingClientRect();
+    polaroid.style.left = `${e.clientX - rect.left}px`;
+    polaroid.style.top = `${e.clientY - rect.top}px`;
+    
+    const rotation = Math.random() * 40 - 20;
+    polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0.4)`;
+    polaroid.style.opacity = "0";
+    polaroid.style.transition = "transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s";
+    
+    worksSection.appendChild(polaroid);
+
+    requestAnimationFrame(() => {
+      polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
+      polaroid.style.opacity = "1";
+    });
+
+    setTimeout(() => {
+      polaroid.style.opacity = "0";
+      setTimeout(() => polaroid.remove(), 500);
+    }, 2200);
+  };
+
+  worksSection.addEventListener('mousemove', (e) => {
+    const distance = Math.hypot(e.clientX - last.x, e.clientY - last.y);
+    if (distance > 120) {
+      last = { x: e.clientX, y: e.clientY };
+      activatePolaroid(e, travelImages[globalIndex % travelImages.length]);
+      globalIndex++;
+    }
   });
 
   // ---------- 3D Rotating LORs ----------
@@ -180,7 +231,6 @@
     lorGrid.appendChild(card);
   });
 
-  // Calculate 3D Ring placement
   const lorCardsNodes = document.querySelectorAll('.lor-card');
   const radius = window.innerWidth < 768 ? 200 : 380; 
 
@@ -196,7 +246,6 @@
     });
   });
 
-  // Bind ring rotation to scroll
   gsap.to("#lor-grid", {
     rotationY: 360,
     ease: "none",
@@ -217,57 +266,6 @@
     if (e.target === document.getElementById('works-modal')) {
       document.getElementById('works-modal').classList.remove('is-open');
       document.getElementById('works-iframe').src = "";
-    }
-  });
-
-  // ---------- Polaroid Travel Trail ----------
-  const travelSection = document.getElementById('travels');
-  const travelImages = c.travels.images; // Pulling cleanly from content.js
-  let globalIndex = 0;
-  let last = { x: 0, y: 0 };
-
-  const activatePolaroid = (e, imageSrc) => {
-    const polaroid = document.createElement("img");
-    polaroid.src = imageSrc;
-    polaroid.className = "polaroid-trail";
-    
-    polaroid.style.position = "absolute";
-    polaroid.style.width = "220px";
-    polaroid.style.height = "260px";
-    polaroid.style.objectFit = "cover";
-    polaroid.style.padding = "10px 10px 45px 10px";
-    polaroid.style.background = "#fff";
-    polaroid.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)";
-    
-    // Adjust based on section bounding rect so coordinates map cleanly inside
-    const rect = travelSection.getBoundingClientRect();
-    polaroid.style.left = `${e.clientX - rect.left}px`;
-    polaroid.style.top = `${e.clientY - rect.top}px`;
-    
-    const rotation = Math.random() * 40 - 20;
-    polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(0.4)`;
-    polaroid.style.opacity = "0";
-    polaroid.style.transition = "transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s";
-    
-    travelSection.appendChild(polaroid);
-
-    requestAnimationFrame(() => {
-      polaroid.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(1)`;
-      polaroid.style.opacity = "1";
-    });
-
-    setTimeout(() => {
-      polaroid.style.opacity = "0";
-      setTimeout(() => polaroid.remove(), 500);
-    }, 2200);
-  };
-
-  travelSection.addEventListener('mousemove', (e) => {
-    const distance = Math.hypot(e.clientX - last.x, e.clientY - last.y);
-    if (distance > 120) {
-      last = { x: e.clientX, y: e.clientY };
-      activatePolaroid(e, travelImages[globalIndex % travelImages.length]);
-      globalIndex++;
     }
   });
 
@@ -292,7 +290,7 @@
   document.getElementById("footer-name").textContent = c.identity.shortName;
   document.getElementById("year").textContent = new Date().getFullYear();
 
-  // ---------- Standard Scroll Reveal Observer (For Git Log) ----------
+  // ---------- Standard Scroll Reveal Observer ----------
   const revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((entries) => {

@@ -36,12 +36,12 @@
     aboutGrid.appendChild(el);
   });
 
-  // ---------- The Serum-Ad Seamless Image Scrub (Fixed Math) ----------
+  // ---------- The Serum-Ad Seamless Image Scrub (Box Fix) ----------
   const heroImg = document.getElementById("hero-img");
   const aboutTarget = document.getElementById("about-profile-target");
 
   const buildScrubAnimation = () => {
-    // Ensure transform origins are top left for accurate coordinate mapping
+    // Force top-left origin so X/Y coordinates map perfectly without offset drift
     gsap.set(heroImg, { transformOrigin: "top left" });
     
     gsap.to(heroImg, {
@@ -57,13 +57,12 @@
       },
       width: () => aboutTarget.getBoundingClientRect().width,
       height: () => aboutTarget.getBoundingClientRect().height,
-      borderRadius: "28px", // Morph from circle to soft rectangle
-      borderWidth: "1px",
-      borderColor: "rgba(255,255,255,0.2)",
+      borderRadius: "28px", // Soften edges
+      borderWidth: "0px", // KILLS THE SQUARE BOX
       boxShadow: "none",
       ease: "none",
       scrollTrigger: {
-        trigger: "body", // Absolute page scroll tracking
+        trigger: "body", 
         start: "top top",
         endTrigger: "#about",
         end: "center center",
@@ -158,27 +157,46 @@
     document.getElementById('works-iframe').src = "";
   });
 
-  // ---------- Works Section Polaroid Cursor Trail (Re-routed) ----------
+  // ---------- Works Section Click-to-Reveal Polaroid ----------
   const worksSection = document.getElementById('works');
-  const travelImages = c.travels.images; 
+  const worksData = c.works.items; // Pulls from your works array instead of travels
   let globalIndex = 0;
-  let last = { x: 0, y: 0 };
 
-  const activatePolaroid = (e, imageSrc) => {
-    const polaroid = document.createElement("img");
-    polaroid.src = imageSrc;
+  const activatePolaroid = (e, workItem) => {
+    // Create the physical polaroid container
+    const polaroid = document.createElement("div");
     polaroid.className = "polaroid-trail";
     
     polaroid.style.position = "absolute";
-    polaroid.style.width = "220px";
-    polaroid.style.height = "260px";
-    polaroid.style.objectFit = "cover";
-    polaroid.style.padding = "10px 10px 45px 10px";
-    polaroid.style.background = "#fff";
-    polaroid.style.boxShadow = "0 20px 40px rgba(0,0,0,0.4)";
-    polaroid.style.zIndex = "2"; // Underneath the works cards but above background
+    polaroid.style.width = "260px";
+    polaroid.style.padding = "12px 12px 50px 12px";
+    polaroid.style.background = "#f4f4f4";
+    polaroid.style.boxShadow = "0 30px 60px rgba(0,0,0,0.5)";
+    polaroid.style.zIndex = "2"; // Drops behind the 3D grid but above the background
+    polaroid.style.pointerEvents = "none"; // Ensures it doesn't block future clicks
     
-    // Map absolute mouse position strictly to the works block
+    // Create the image
+    const img = document.createElement("img");
+    img.src = workItem.image;
+    img.style.width = "100%";
+    img.style.height = "160px";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    img.style.border = "1px solid rgba(0,0,0,0.1)";
+
+    // Add the title to the bottom of the polaroid
+    const title = document.createElement("div");
+    title.textContent = workItem.title;
+    title.style.color = "#111";
+    title.style.fontFamily = "var(--font-mono)";
+    title.style.fontSize = "13px";
+    title.style.textAlign = "center";
+    title.style.marginTop = "16px";
+    title.style.fontWeight = "bold";
+
+    polaroid.appendChild(img);
+    polaroid.appendChild(title);
+    
     const rect = worksSection.getBoundingClientRect();
     polaroid.style.left = `${e.clientX - rect.left}px`;
     polaroid.style.top = `${e.clientY - rect.top}px`;
@@ -195,19 +213,20 @@
       polaroid.style.opacity = "1";
     });
 
+    // Stay on screen longer since it's an intentional click
     setTimeout(() => {
       polaroid.style.opacity = "0";
-      setTimeout(() => polaroid.remove(), 500);
-    }, 2200);
+      setTimeout(() => polaroid.remove(), 600);
+    }, 4500);
   };
 
-  worksSection.addEventListener('mousemove', (e) => {
-    const distance = Math.hypot(e.clientX - last.x, e.clientY - last.y);
-    if (distance > 120) {
-      last = { x: e.clientX, y: e.clientY };
-      activatePolaroid(e, travelImages[globalIndex % travelImages.length]);
-      globalIndex++;
-    }
+  // Trigger on click anywhere in the section
+  worksSection.addEventListener('click', (e) => {
+    // Don't spawn a polaroid if they clicked directly on one of the 3D project cards
+    if (e.target.closest('.work-card')) return; 
+    
+    activatePolaroid(e, worksData[globalIndex % worksData.length]);
+    globalIndex++;
   });
 
   // ---------- 3D Rotating LORs ----------

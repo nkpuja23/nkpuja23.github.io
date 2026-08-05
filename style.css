@@ -126,7 +126,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
    ========================================================= */
 .hero {
   padding-top: clamp(72px, 14vw, 140px); padding-bottom: clamp(56px, 10vw, 96px);
-  position: relative; overflow: visible; z-index: 10; /* Fixed to allow image escape */
+  position: relative; overflow: visible; z-index: 10; 
 }
 .hero::before {
   content: ""; position: absolute; top: -20%; right: -10%;
@@ -155,10 +155,10 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 #hero-img {
   width: 100%; height: auto; object-fit: cover;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.08);
+  border: 3px solid rgba(255,255,255,0.08); /* Initial border gets killed by GSAP on scroll */
   box-shadow: 0 30px 70px rgba(0,0,0,0.35);
   position: relative;
-  z-index: 50; /* Needs to float above other sections during transition */
+  z-index: 50; 
 }
 
 /* =========================================================
@@ -168,7 +168,9 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 .about-profile-panel { display: flex; justify-content: flex-end; align-items: start; }
 .about-profile-target {
   width: min(100%, 320px); aspect-ratio: 1 / 1; 
-  /* Removed border and background so it is completely invisible */
+  /* ZERO BORDERS, ZERO BACKGROUND. Perfectly invisible until GSAP image lands */
+  border: none;
+  background: transparent;
   display: grid; place-items: center;
 }
 .about-grid { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 720px; }
@@ -214,7 +216,7 @@ p { color: var(--text-muted); margin: 0 0 1em; }
 /* =========================================================
    3D WORKS GALLERY
    ========================================================= */
-#works { perspective: 2000px; }
+#works { perspective: 2000px; cursor: crosshair; }
 .works-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; transform-style: preserve-3d; position: relative; z-index: 5; }
 .work-card {
   width: 320px;

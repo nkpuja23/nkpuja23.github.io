@@ -694,6 +694,11 @@ footer a { color: var(--text-dim); }
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
+.work-card.reveal,
+.lor-card.reveal {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
 
 /* =========================================================
    HERO LAYOUT & ANIMATIONS (ADDITIONS)

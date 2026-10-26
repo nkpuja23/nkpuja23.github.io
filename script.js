@@ -148,12 +148,11 @@
     polaroid.style.pointerEvents = "auto";
     polaroid.style.cursor = "pointer";
     polaroid.addEventListener('click', (ev) => {
-      ev.stopPropagation(); // Prevents spawning another polaroid underneath it
-      if(workItem.link) {
-        document.getElementById('works-modal').classList.add('is-open');
-        document.getElementById('works-iframe').src = workItem.link; 
-      }
-    });
+  ev.stopPropagation(); 
+  if(workItem.link) {
+    window.open(workItem.link, '_blank'); 
+  }
+});
 
     const img = document.createElement("img");
     img.src = workItem.image;

@@ -12,7 +12,7 @@ const SITE_CONTENT = {
     subline: "Incoming @ UMass Amherst, Fall 2026 — previously ICAS, MAHE",
     resumeLink: "Nagapujitha_Karthikeyan_Resume.pdf",
     email: "nkpuja23@gmail.com",
-    phone: "+91 636 442 1819",
+    phone: "+1 413-472-8886",
     linkedin: "https://www.linkedin.com/in/nagapujitha-karthikeyan-225226318",
     github: "https://github.com/nkpuja23",
     heroImage: "puja-hero-nobg.png" 

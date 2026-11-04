@@ -333,18 +333,20 @@ magneticEls.forEach(btn => {
 
   // Background Motion Canvas Network logic
   // ---------- Vanta.js 3D Background ----------
-VANTA.NET({
-  el: "#motion-canvas",
-  mouseControls: true,
-  touchControls: true,
-  gyroControls: false,
-  minHeight: 200.00,
-  minWidth: 200.00,
-  scale: 1.00,
-  scaleMobile: 1.00,
-  color: 0x5fd6c0,
-  backgroundColor: 0x0e1015,
-  points: 12.00,
-  maxDistance: 22.00,
-  spacing: 18.00
-});
+// ---------- Vanta.js 3D Background ----------
+  VANTA.NET({
+    el: "#motion-canvas",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    scale: 1.00,
+    scaleMobile: 1.00,
+    color: 0x5fd6c0,
+    backgroundColor: 0x0e1015,
+    points: 12.00,
+    maxDistance: 22.00,
+    spacing: 18.00
+  });
+})();

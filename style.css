@@ -49,9 +49,10 @@ body {
 #motion-canvas {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 0;
   pointer-events: none;
-  mix-blend-mode: screen;
 }
 
 a { color: var(--accent-2); text-decoration: none; }
@@ -249,7 +250,8 @@ p { color: var(--text-muted); margin: 0 0 1em; }
   content: ""; 
   position: absolute; 
   top: 0; left: 0; width: 100%; height: 100%;
-  background: radial-gradient(600px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(95, 214, 192, 0.12), transparent 40%);
+  /* Added px to the 0 fallbacks below */
+  background: radial-gradient(600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(95, 214, 192, 0.12), transparent 40%);
   opacity: 0; 
   transition: opacity 0.3s ease; 
   z-index: 0; 

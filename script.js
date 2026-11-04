@@ -26,6 +26,19 @@
   const resumeLink2 = document.getElementById("resume-link-2");
   if (resumeLink2) resumeLink2.href = c.identity.resumeLink;
   document.title = c.identity.name + " — " + c.identity.tagline;
+  // ---------- Magnetic UI ----------
+const magneticEls = document.querySelectorAll('.btn-primary, .nav-links a');
+magneticEls.forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+    const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+    gsap.to(btn, { x, y, duration: 0.3, ease: "power2.out" });
+  });
+  btn.addEventListener('mouseleave', () => {
+    gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+  });
+});
 
   // ---------- About ----------
   document.getElementById("about-heading").textContent = c.about.heading;
@@ -108,8 +121,16 @@
   c.skills.items.forEach((s) => {
     const card = document.createElement("div");
     card.className = "skill-card";
-    card.innerHTML = `<div class="skill-cat">${s.category}</div><div class="skill-name">${s.name}</div><p>${s.description}</p>`;
+    card.innerHTML = `<div class="skill-content"><div class="skill-cat">${s.category}</div><div class="skill-name">${s.name}</div><p>${s.description}</p></div>`;
     skillsGrid.appendChild(card);
+  });
+
+  document.querySelectorAll('.skill-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    });
   });
 
   // ---------- Featured project ----------
@@ -311,78 +332,19 @@
   });
 
   // Background Motion Canvas Network logic
-  const canvas = document.getElementById("motion-canvas");
-  const context = canvas ? canvas.getContext("2d") : null;
-  const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, active: false };
-  const particles = [];
-  const palette = { accent2: [95, 214, 192], neutral: [255, 255, 255] };
-
-  function resizeCanvas() {
-    if (!canvas || !context) return;
-    canvas.width = window.innerWidth * window.devicePixelRatio;
-    canvas.height = window.innerHeight * window.devicePixelRatio;
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
-    context.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-  }
-
-  function randomBetween(min, max) { return min + Math.random() * (max - min); }
-  function spawnParticle(x, y) {
-    particles.push({ x, y, vx: randomBetween(-0.7, 0.7), vy: randomBetween(-0.7, 0.7), radius: randomBetween(1.5, 4.2), alpha: 1, life: randomBetween(60, 110) });
-    if (particles.length > 140) particles.splice(0, particles.length - 140);
-  }
-
-  function renderCanvas() {
-    if (!canvas || !context) return;
-    context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const glow = context.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 240);
-    glow.addColorStop(0, "rgba(95,214,192,0.18)");
-    glow.addColorStop(0.35, "rgba(95,214,192,0.02)");
-    glow.addColorStop(1, "transparent");
-    context.fillStyle = glow;
-    context.fillRect(0, 0, window.innerWidth, window.innerHeight);
-    
-    for (let i = 0; i < particles.length; i++) {
-      const a = particles[i];
-      for (let j = i + 1; j < particles.length; j++) {
-        const b = particles[j];
-        const dist = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-        if (dist < 110) {
-          context.strokeStyle = `rgba(${palette.accent2.join(",")}, ${0.11 - dist / 900})`;
-          context.lineWidth = 1;
-          context.beginPath(); context.moveTo(a.x, a.y); context.lineTo(b.x, b.y); context.stroke();
-        }
-      }
-    }
-    
-    particles.forEach((p) => {
-      p.x += p.vx; p.y += p.vy; p.alpha *= 0.987; p.life -= 1;
-      if (p.life > 0) {
-        context.beginPath();
-        context.fillStyle = `rgba(${palette.neutral.join(",")}, ${p.alpha})`;
-        context.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        context.fill();
-      }
-    });
-
-    for (let i = particles.length - 1; i >= 0; i--) {
-      if (particles[i].life <= 0 || particles[i].alpha <= 0.03) particles.splice(i, 1);
-    }
-    requestAnimationFrame(renderCanvas);
-  }
-
-  if (canvas && context) {
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("mousemove", (event) => {
-      pointer.x = event.clientX; pointer.y = event.clientY; pointer.active = true;
-      spawnParticle(pointer.x, pointer.y);
-    });
-    window.addEventListener("mouseleave", () => { pointer.active = false; });
-    document.addEventListener("scroll", () => {
-      if (!pointer.active) return;
-      spawnParticle(pointer.x + randomBetween(-24, 24), pointer.y + randomBetween(-24, 24));
-    }, { passive: true });
-    renderCanvas();
-  }
-})();
+  // ---------- Vanta.js 3D Background ----------
+VANTA.NET({
+  el: "#motion-canvas",
+  mouseControls: true,
+  touchControls: true,
+  gyroControls: false,
+  minHeight: 200.00,
+  minWidth: 200.00,
+  scale: 1.00,
+  scaleMobile: 1.00,
+  color: 0x5fd6c0,
+  backgroundColor: 0x0e1015,
+  points: 12.00,
+  maxDistance: 22.00,
+  spacing: 18.00
+});

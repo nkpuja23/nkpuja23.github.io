@@ -126,8 +126,11 @@ p { color: var(--text-muted); margin: 0 0 1em; }
    HERO
    ========================================================= */
 .hero {
-  padding-top: clamp(72px, 14vw, 140px); padding-bottom: clamp(56px, 10vw, 96px);
-  position: relative; overflow: visible; z-index: 10; 
+  padding-top: clamp(72px, 14vw, 140px); 
+  padding-bottom: clamp(56px, 10vw, 96px);
+  position: relative; 
+  overflow: hidden; /* Contains the Vanta canvas */
+  z-index: 10; 
 }
 .hero::before {
   content: ""; position: absolute; top: -20%; right: -10%;

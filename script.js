@@ -376,8 +376,9 @@ magneticEls.forEach(btn => {
   });
 
   // ---------- Vanta.js 3D Net (Global Background) ----------
+  // ---------- Vanta.js 3D Net (Hero Section Background) ----------
   VANTA.NET({
-    el: "#motion-canvas",
+    el: ".hero", // Targets the hero section instead of the global canvas
     mouseControls: true,
     touchControls: true,
     gyroControls: false,

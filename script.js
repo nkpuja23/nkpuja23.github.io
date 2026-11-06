@@ -5,18 +5,20 @@
   const c = SITE_CONTENT;
 
   // ---------- GSAP & Lenis Setup ----------
-  gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger);
 
-  const lenis = new Lenis({
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smooth: true,
-  });
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
+const lenis = new Lenis({
+  duration: 1.8, /* Increased for a more buttery glide */
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true,
+  wheelMultiplier: 0.7, /* Softens the scroll step */
+  touchMultiplier: 2,
+});
+function raf(time) {
+  lenis.raf(time);
   requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
 
   // ---------- DOM Population ----------
   document.getElementById("hero-name").textContent = c.identity.name;
@@ -330,10 +332,50 @@ magneticEls.forEach(btn => {
   document.querySelectorAll(".commit.reveal").forEach((el, i) => {
     el.style.transitionDelay = Math.min(i * 60, 300) + "ms";
   });
+  
+  // ---------- Fancy Lettering Effect ----------
+  const headings = document.querySelectorAll('#hero-name, h2.section-head, #timeline-heading, #skills-heading');
+  
+  headings.forEach(heading => {
+    const text = heading.textContent;
+    if (!text || text === "Loading…") return; // Prevent splitting empty/unpopulated titles
+    
+    heading.innerHTML = ''; 
+    
+    text.split('').forEach(char => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.textContent = char === ' ' ? '\u00A0' : char; 
+      heading.appendChild(span);
+    });
 
-  // Background Motion Canvas Network logic
-  // ---------- Vanta.js 3D Background ----------
-// ---------- Vanta.js 3D Background ----------
+    // Special case for Hero Name: Animate immediately on load
+    if (heading.id === 'hero-name') {
+      gsap.to(heading.querySelectorAll('.char'), {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.03,
+        ease: "back.out(1.5)",
+        delay: 0.2
+      });
+    } else {
+      // Other section headings animate on scroll
+      gsap.to(heading.querySelectorAll('.char'), {
+        scrollTrigger: {
+          trigger: heading,
+          start: "top 85%",
+        },
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.03,
+        ease: "back.out(1.5)"
+      });
+    }
+  });
+
+  // ---------- Vanta.js 3D Net (Global Background) ----------
   VANTA.NET({
     el: "#motion-canvas",
     mouseControls: true,
@@ -348,5 +390,19 @@ magneticEls.forEach(btn => {
     points: 12.00,
     maxDistance: 22.00,
     spacing: 18.00
+  });
+  
+  // ---------- Vanta.js Halo (Works Section Backdrop) ----------
+  VANTA.HALO({
+    el: "#works",
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    minHeight: 200.00,
+    minWidth: 200.00,
+    baseColor: 0x5fd6c0,
+    backgroundColor: 0x0e1015,
+    amplitudeFactor: 1.50,
+    size: 1.50
   });
 })();

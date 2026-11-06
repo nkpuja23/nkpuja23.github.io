@@ -374,6 +374,62 @@ magneticEls.forEach(btn => {
       });
     }
   });
+  
+  // ---------- Shape Magic (ReactBits Vanilla Adaptation) ----------
+  const shapeContainer = document.getElementById('shape-magic-container');
+  if (shapeContainer) {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, shapeContainer.clientWidth / shapeContainer.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    
+    renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
+    shapeContainer.appendChild(renderer.domElement);
+
+    // Create a complex geometric wireframe
+    const geometry = new THREE.IcosahedronGeometry(2, 2);
+    const material = new THREE.MeshBasicMaterial({ 
+      color: 0x5fd6c0, 
+      wireframe: true,
+      transparent: true,
+      opacity: 0.8
+    });
+    
+    const magicShape = new THREE.Mesh(geometry, material);
+    scene.add(magicShape);
+    camera.position.z = 5;
+
+    // Track mouse coordinates for interactive rotation
+    let mouseX = 0;
+    let mouseY = 0;
+    shapeContainer.addEventListener('mousemove', (e) => {
+      const rect = shapeContainer.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / shapeContainer.clientWidth) * 2 - 1;
+      mouseY = -((e.clientY - rect.top) / shapeContainer.clientHeight) * 2 + 1;
+    });
+
+    function animateShape() {
+      requestAnimationFrame(animateShape);
+      
+      // Base rotation + mouse interaction
+      magicShape.rotation.x += 0.003 + (mouseY * 0.02);
+      magicShape.rotation.y += 0.005 + (mouseX * 0.02);
+      
+      // Morphing scale effect
+      const time = Date.now() * 0.0015;
+      const scale = 1 + Math.sin(time) * 0.15;
+      magicShape.scale.set(scale, scale, scale);
+      
+      renderer.render(scene, camera);
+    }
+    animateShape();
+
+    // Handle container resizing
+    window.addEventListener('resize', () => {
+      camera.aspect = shapeContainer.clientWidth / shapeContainer.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
+    });
+  }
 
   // ---------- Vanta.js 3D Net (Global Background) ----------
   // ---------- Vanta.js 3D Net (Hero Section Background) ----------

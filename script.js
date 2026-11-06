@@ -4,21 +4,21 @@
 (function () {
   const c = SITE_CONTENT;
 
-  // ---------- GSAP & Lenis Setup ----------
-gsap.registerPlugin(ScrollTrigger);
+// ---------- GSAP & Lenis Setup ----------
+  gsap.registerPlugin(ScrollTrigger);
 
-const lenis = new Lenis({
-  duration: 1.8, /* Increased for a more buttery glide */
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  smoothWheel: true,
-  wheelMultiplier: 0.7, /* Softens the scroll step */
-  touchMultiplier: 2,
-});
-function raf(time) {
-  lenis.raf(time);
+  const lenis = new Lenis({
+    duration: 1.8,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smooth: true, /* Fixed for v1.0.19 compatibility */
+    wheelMultiplier: 0.7,
+    touchMultiplier: 2,
+  });
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
   requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
 
   // ---------- DOM Population ----------
   document.getElementById("hero-name").textContent = c.identity.name;
@@ -296,8 +296,6 @@ magneticEls.forEach(btn => {
   // ---------- Activities & Contact ----------
   document.getElementById("activities-heading").textContent = c.activities.heading;
   document.getElementById("activities-desc").textContent = c.activities.description;
-  const actImg = document.getElementById("activities-image");
-  actImg.src = c.activities.image;
 
   document.getElementById("contact-heading").textContent = c.contact.heading;
   document.getElementById("contact-message").textContent = c.contact.message;
@@ -376,90 +374,91 @@ magneticEls.forEach(btn => {
   });
   
   // ---------- Shape Magic (ReactBits Vanilla Adaptation) ----------
-  const shapeContainer = document.getElementById('shape-magic-container');
-  if (shapeContainer) {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, shapeContainer.clientWidth / shapeContainer.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    
-    renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
-    shapeContainer.appendChild(renderer.domElement);
-
-    // Create a complex geometric wireframe
-    const geometry = new THREE.IcosahedronGeometry(2, 2);
-    const material = new THREE.MeshBasicMaterial({ 
-      color: 0x5fd6c0, 
-      wireframe: true,
-      transparent: true,
-      opacity: 0.8
-    });
-    
-    const magicShape = new THREE.Mesh(geometry, material);
-    scene.add(magicShape);
-    camera.position.z = 5;
-
-    // Track mouse coordinates for interactive rotation
-    let mouseX = 0;
-    let mouseY = 0;
-    shapeContainer.addEventListener('mousemove', (e) => {
-      const rect = shapeContainer.getBoundingClientRect();
-      mouseX = ((e.clientX - rect.left) / shapeContainer.clientWidth) * 2 - 1;
-      mouseY = -((e.clientY - rect.top) / shapeContainer.clientHeight) * 2 + 1;
-    });
-
-    function animateShape() {
-      requestAnimationFrame(animateShape);
+  try {
+    const shapeContainer = document.getElementById('shape-magic-container');
+    if (shapeContainer && typeof THREE !== 'undefined') {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, shapeContainer.clientWidth / shapeContainer.clientHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       
-      // Base rotation + mouse interaction
-      magicShape.rotation.x += 0.003 + (mouseY * 0.02);
-      magicShape.rotation.y += 0.005 + (mouseX * 0.02);
-      
-      // Morphing scale effect
-      const time = Date.now() * 0.0015;
-      const scale = 1 + Math.sin(time) * 0.15;
-      magicShape.scale.set(scale, scale, scale);
-      
-      renderer.render(scene, camera);
-    }
-    animateShape();
-
-    // Handle container resizing
-    window.addEventListener('resize', () => {
-      camera.aspect = shapeContainer.clientWidth / shapeContainer.clientHeight;
-      camera.updateProjectionMatrix();
       renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
-    });
+      shapeContainer.appendChild(renderer.domElement);
+
+      const geometry = new THREE.IcosahedronGeometry(2, 2);
+      const material = new THREE.MeshBasicMaterial({ 
+        color: 0x5fd6c0, 
+        wireframe: true,
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const magicShape = new THREE.Mesh(geometry, material);
+      scene.add(magicShape);
+      camera.position.z = 5;
+
+      let mouseX = 0, mouseY = 0;
+      shapeContainer.addEventListener('mousemove', (e) => {
+        const rect = shapeContainer.getBoundingClientRect();
+        mouseX = ((e.clientX - rect.left) / shapeContainer.clientWidth) * 2 - 1;
+        mouseY = -((e.clientY - rect.top) / shapeContainer.clientHeight) * 2 + 1;
+      });
+
+      function animateShape() {
+        requestAnimationFrame(animateShape);
+        magicShape.rotation.x += 0.003 + (mouseY * 0.02);
+        magicShape.rotation.y += 0.005 + (mouseX * 0.02);
+        
+        const time = Date.now() * 0.0015;
+        const scale = 1 + Math.sin(time) * 0.15;
+        magicShape.scale.set(scale, scale, scale);
+        
+        renderer.render(scene, camera);
+      }
+      animateShape();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = shapeContainer.clientWidth / shapeContainer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
+      });
+    }
+  } catch (err) {
+    console.warn("Shape Magic skipped: WebGL not supported or blocked.");
   }
 
-  // ---------- Vanta.js 3D Net (Global Background) ----------
-  // ---------- Vanta.js 3D Net (Hero Section Background) ----------
-  VANTA.NET({
-    el: ".hero", // Targets the hero section instead of the global canvas
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    scale: 1.00,
-    scaleMobile: 1.00,
-    color: 0x5fd6c0,
-    backgroundColor: 0x0e1015,
-    points: 12.00,
-    maxDistance: 22.00,
-    spacing: 18.00
-  });
-  
-  // ---------- Vanta.js Halo (Works Section Backdrop) ----------
-  VANTA.HALO({
-    el: "#works",
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    minHeight: 200.00,
-    minWidth: 200.00,
-    baseColor: 0x5fd6c0,
-    backgroundColor: 0x0e1015,
-    amplitudeFactor: 1.50,
-    size: 1.50
-  });
+  // ---------- Vanta.js Backgrounds ----------
+  try {
+    if (typeof VANTA !== 'undefined') {
+      VANTA.NET({
+        el: ".hero", 
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        scale: 1.00,
+        scaleMobile: 1.00,
+        color: 0x5fd6c0,
+        backgroundColor: 0x0e1015,
+        points: 12.00,
+        maxDistance: 22.00,
+        spacing: 18.00
+      });
+      
+      VANTA.HALO({
+        el: "#works",
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200.00,
+        minWidth: 200.00,
+        baseColor: 0x5fd6c0,
+        backgroundColor: 0x0e1015,
+        amplitudeFactor: 1.50,
+        size: 1.50
+      });
+    }
+  } catch (err) {
+    console.warn("Vanta Backgrounds skipped: CDN blocked or WebGL disabled.");
+  }
 })();

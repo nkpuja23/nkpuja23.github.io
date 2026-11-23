@@ -4,13 +4,13 @@
 (function () {
   const c = SITE_CONTENT;
 
-// ---------- GSAP & Lenis Setup ----------
+  // ---------- GSAP & Lenis Setup ----------
   gsap.registerPlugin(ScrollTrigger);
 
   const lenis = new Lenis({
     duration: 1.8,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smooth: true, /* Fixed for v1.0.19 compatibility */
+    smooth: true,
     wheelMultiplier: 0.7,
     touchMultiplier: 2,
   });
@@ -28,19 +28,20 @@
   const resumeLink2 = document.getElementById("resume-link-2");
   if (resumeLink2) resumeLink2.href = c.identity.resumeLink;
   document.title = c.identity.name + " — " + c.identity.tagline;
+
   // ---------- Magnetic UI ----------
-const magneticEls = document.querySelectorAll('.btn-primary, .nav-links a');
-magneticEls.forEach(btn => {
-  btn.addEventListener('mousemove', (e) => {
-    const rect = btn.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
-    const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
-    gsap.to(btn, { x, y, duration: 0.3, ease: "power2.out" });
+  const magneticEls = document.querySelectorAll('.btn-primary, .nav-links a');
+  magneticEls.forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
+      gsap.to(btn, { x, y, duration: 0.3, ease: "power2.out" });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+    });
   });
-  btn.addEventListener('mouseleave', () => {
-    gsap.to(btn, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
-  });
-});
 
   // ---------- About ----------
   document.getElementById("about-heading").textContent = c.about.heading;
@@ -96,7 +97,7 @@ magneticEls.forEach(btn => {
   document.getElementById("timeline-subheading").textContent = c.timeline.subheading;
   document.getElementById("timeline-branch-name").textContent = c.timeline.branch;
   const log = document.getElementById("log");
-  c.timeline.entries.forEach((entry, i) => {
+  c.timeline.entries.forEach((entry) => {
     const commit = document.createElement("div");
     commit.className = "commit reveal";
     commit.innerHTML = `
@@ -167,15 +168,14 @@ magneticEls.forEach(btn => {
     polaroid.style.boxShadow = "0 30px 60px rgba(0,0,0,0.5)";
     polaroid.style.zIndex = "2"; 
     
-    // Make the generated polaroid clickable to open the iframe modal
     polaroid.style.pointerEvents = "auto";
     polaroid.style.cursor = "pointer";
     polaroid.addEventListener('click', (ev) => {
-  ev.stopPropagation(); 
-  if(workItem.link) {
-    window.open(workItem.link, '_blank'); 
-  }
-});
+      ev.stopPropagation(); 
+      if (workItem.link) {
+        window.open(workItem.link, '_blank'); 
+      }
+    });
 
     const img = document.createElement("img");
     img.src = workItem.image;
@@ -213,7 +213,6 @@ magneticEls.forEach(btn => {
       polaroid.style.opacity = "1";
     });
 
-    // Stays visible for longer so users have time to click it
     setTimeout(() => {
       polaroid.style.opacity = "0";
       setTimeout(() => polaroid.remove(), 600);
@@ -225,7 +224,6 @@ magneticEls.forEach(btn => {
     globalIndex++;
   });
 
-  // Modal close handler for works
   document.getElementById('close-works-modal').addEventListener('click', () => {
     document.getElementById('works-modal').classList.remove('is-open');
     document.getElementById('works-iframe').src = "";
@@ -268,7 +266,6 @@ magneticEls.forEach(btn => {
     });
   });
 
-  // Arrow Controls Logic
   let currentLorAngle = 0;
 
   document.getElementById("lor-prev").addEventListener("click", () => {
@@ -296,6 +293,11 @@ magneticEls.forEach(btn => {
   // ---------- Activities & Contact ----------
   document.getElementById("activities-heading").textContent = c.activities.heading;
   document.getElementById("activities-desc").textContent = c.activities.description;
+  const actImg = document.getElementById("activities-image");
+  if (actImg) {
+    actImg.src = c.activities.image;
+    actImg.alt = "Activity board — 2023–25";
+  }
 
   document.getElementById("contact-heading").textContent = c.contact.heading;
   document.getElementById("contact-message").textContent = c.contact.message;
@@ -316,13 +318,13 @@ magneticEls.forEach(btn => {
   const revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            io.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
     revealEls.forEach((el) => io.observe(el));
   } else {
     revealEls.forEach((el) => el.classList.add("is-visible"));
@@ -331,23 +333,34 @@ magneticEls.forEach(btn => {
     el.style.transitionDelay = Math.min(i * 60, 300) + "ms";
   });
   
-  // ---------- Fancy Lettering Effect ----------
+  // ---------- Fancy Lettering Effect (Word-Safe Wrapping) ----------
   const headings = document.querySelectorAll('#hero-name, h2.section-head, #timeline-heading, #skills-heading');
   
   headings.forEach(heading => {
-    const text = heading.textContent;
-    if (!text || text === "Loading…") return; // Prevent splitting empty/unpopulated titles
+    const text = heading.textContent.trim();
+    if (!text || text === "Loading…") return;
     
     heading.innerHTML = ''; 
     
-    text.split('').forEach(char => {
-      const span = document.createElement('span');
-      span.className = 'char';
-      span.textContent = char === ' ' ? '\u00A0' : char; 
-      heading.appendChild(span);
+    const words = text.split(' ');
+    words.forEach((word, wIndex) => {
+      const wordSpan = document.createElement('span');
+      wordSpan.className = 'word';
+
+      word.split('').forEach(char => {
+        const span = document.createElement('span');
+        span.className = 'char';
+        span.textContent = char;
+        wordSpan.appendChild(span);
+      });
+
+      heading.appendChild(wordSpan);
+
+      if (wIndex < words.length - 1) {
+        heading.appendChild(document.createTextNode(' '));
+      }
     });
 
-    // Special case for Hero Name: Animate immediately on load
     if (heading.id === 'hero-name') {
       gsap.to(heading.querySelectorAll('.char'), {
         opacity: 1,
@@ -358,7 +371,6 @@ magneticEls.forEach(btn => {
         delay: 0.2
       });
     } else {
-      // Other section headings animate on scroll
       gsap.to(heading.querySelectorAll('.char'), {
         scrollTrigger: {
           trigger: heading,
@@ -372,59 +384,6 @@ magneticEls.forEach(btn => {
       });
     }
   });
-  
-  // ---------- Shape Magic (ReactBits Vanilla Adaptation) ----------
-  try {
-    const shapeContainer = document.getElementById('shape-magic-container');
-    if (shapeContainer && typeof THREE !== 'undefined') {
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, shapeContainer.clientWidth / shapeContainer.clientHeight, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      
-      renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
-      shapeContainer.appendChild(renderer.domElement);
-
-      const geometry = new THREE.IcosahedronGeometry(2, 2);
-      const material = new THREE.MeshBasicMaterial({ 
-        color: 0x5fd6c0, 
-        wireframe: true,
-        transparent: true,
-        opacity: 0.8
-      });
-      
-      const magicShape = new THREE.Mesh(geometry, material);
-      scene.add(magicShape);
-      camera.position.z = 5;
-
-      let mouseX = 0, mouseY = 0;
-      shapeContainer.addEventListener('mousemove', (e) => {
-        const rect = shapeContainer.getBoundingClientRect();
-        mouseX = ((e.clientX - rect.left) / shapeContainer.clientWidth) * 2 - 1;
-        mouseY = -((e.clientY - rect.top) / shapeContainer.clientHeight) * 2 + 1;
-      });
-
-      function animateShape() {
-        requestAnimationFrame(animateShape);
-        magicShape.rotation.x += 0.003 + (mouseY * 0.02);
-        magicShape.rotation.y += 0.005 + (mouseX * 0.02);
-        
-        const time = Date.now() * 0.0015;
-        const scale = 1 + Math.sin(time) * 0.15;
-        magicShape.scale.set(scale, scale, scale);
-        
-        renderer.render(scene, camera);
-      }
-      animateShape();
-
-      window.addEventListener('resize', () => {
-        camera.aspect = shapeContainer.clientWidth / shapeContainer.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(shapeContainer.clientWidth, shapeContainer.clientHeight);
-      });
-    }
-  } catch (err) {
-    console.warn("Shape Magic skipped: WebGL not supported or blocked.");
-  }
 
   // ---------- Vanta.js Backgrounds ----------
   try {

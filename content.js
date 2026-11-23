@@ -10,7 +10,7 @@ const SITE_CONTENT = {
     shortName: "Puja",
     tagline: "CS major & aspiring AI engineer",
     subline: "Incoming @ UMass Amherst, Fall 2026 — previously ICAS, MAHE",
-    resumeLink: "Nagapujitha_Karthikeyan_Resume.pdf",
+    resumeLink: "Nagapujitha_Resume.pdf",
     email: "nkpuja23@gmail.com",
     phone: "+1 413-472-8886",
     linkedin: "https://www.linkedin.com/in/nagapujitha-karthikeyan-225226318",

@@ -52,42 +52,127 @@
     aboutGrid.appendChild(el);
   });
 
-  // ---------- The Serum-Ad Seamless Image Scrub ----------
-  const heroImg = document.getElementById("hero-img");
+  // ---------- Interactive Scroll-Choreographed Host ----------
+  const hostStage = document.getElementById("host-stage");
+  const hostFrame = document.getElementById("host-frame");
+  const hostCallout = document.getElementById("host-callout");
+  const hostCaption = document.getElementById("host-caption");
+  const heroDock = document.getElementById("hero-dock");
   const aboutTarget = document.getElementById("about-profile-target");
 
-  const buildScrubAnimation = () => {
-    gsap.set(heroImg, { transformOrigin: "top left" });
-    
-    gsap.to(heroImg, {
-      x: () => {
-        const targetRect = aboutTarget.getBoundingClientRect();
-        const startRect = heroImg.parentElement.getBoundingClientRect();
-        return targetRect.left - startRect.left;
-      },
-      y: () => {
-        const targetRect = aboutTarget.getBoundingClientRect();
-        const startRect = heroImg.parentElement.getBoundingClientRect();
-        return targetRect.top - startRect.top;
-      },
-      width: () => aboutTarget.getBoundingClientRect().width,
-      height: () => aboutTarget.getBoundingClientRect().height,
-      borderRadius: "28px", 
-      borderWidth: "0px", 
-      boxShadow: "none",
-      ease: "none",
-      scrollTrigger: {
-        trigger: "body", 
-        start: "top top",
-        endTrigger: "#about",
-        end: "center center",
-        scrub: 1, 
-        invalidateOnRefresh: true 
-      }
+  const sectionNotes = [
+    { id: "top", text: "Hi, I'm Puja — scroll down for the tour.", shape: "50%" },
+    { id: "about", text: "3.93 CGPA · CS Honors @ UMass Amherst.", shape: "28px" },
+    { id: "timeline", text: "Every milestone, committed like git.", shape: "50%" },
+    { id: "skills", text: "AI/ML, Computer Vision & Full-Stack.", shape: "50%" },
+    { id: "featured", text: "Flagship full-stack database architecture.", shape: "50%" },
+    { id: "works", text: "Click anywhere to unpack my builds & art!", shape: "50%" },
+    { id: "lors", text: "Use the arrows to spin faculty letters.", shape: "50%" },
+    { id: "activities", text: "Leadership, research & campus life.", shape: "50%" },
+    { id: "contact", text: "Let's build something — reach out!", shape: "28px" }
+  ];
+
+  function setHostCaption(text, borderRadius) {
+    if (!hostCallout || !hostCaption) return;
+    if (hostCaption.textContent !== text) {
+      hostCallout.classList.remove("is-visible");
+      setTimeout(() => {
+        hostCaption.textContent = text;
+        hostCallout.classList.add("is-visible");
+      }, 180);
+    } else {
+      hostCallout.classList.add("is-visible");
+    }
+    if (hostFrame && borderRadius) {
+      hostFrame.style.borderRadius = borderRadius;
+    }
+  }
+
+  function initHostChoreography() {
+    if (!hostStage || !heroDock || !aboutTarget) return;
+
+    setTimeout(() => setHostCaption(sectionNotes[0].text, "50%"), 500);
+
+    window.addEventListener("mousemove", (e) => {
+      if (window.innerWidth <= 960) return;
+      const rect = hostStage.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const rotateY = gsap.utils.clamp(-12, 12, (e.clientX - centerX) / 45);
+      const rotateX = gsap.utils.clamp(-10, 10, -(e.clientY - centerY) / 45);
+      gsap.to(hostFrame, {
+        rotateY,
+        rotateX,
+        transformPerspective: 900,
+        duration: 0.45,
+        ease: "power2.out"
+      });
     });
-  };
-  
-  window.onload = buildScrubAnimation;
+
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 961px)", () => {
+      const dockRect = heroDock.getBoundingClientRect();
+
+      gsap.set(hostStage, {
+        x: dockRect.left,
+        y: dockRect.top,
+        width: dockRect.width,
+        height: dockRect.height
+      });
+
+      // Stage 1: Hero -> About
+      gsap.to(hostStage, {
+        x: () => aboutTarget.getBoundingClientRect().left,
+        y: () => aboutTarget.getBoundingClientRect().top,
+        width: () => aboutTarget.getBoundingClientRect().width,
+        height: () => aboutTarget.getBoundingClientRect().height,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          endTrigger: "#about",
+          end: "center center",
+          scrub: 1,
+          invalidateOnRefresh: true
+        }
+      });
+
+      // Stage 2: About -> Floating guide in bottom-right corner
+      gsap.to(hostStage, {
+        x: () => window.innerWidth - 210,
+        y: () => window.innerHeight - 230,
+        width: 170,
+        height: 170,
+        ease: "power2.inOut",
+        scrollTrigger: {
+          trigger: "#about",
+          start: "bottom 75%",
+          endTrigger: "#timeline",
+          end: "top 35%",
+          scrub: 1,
+          invalidateOnRefresh: true
+        }
+      });
+    });
+
+    sectionNotes.forEach((note) => {
+      const sectionEl = document.getElementById(note.id);
+      if (!sectionEl) return;
+      ScrollTrigger.create({
+        trigger: sectionEl,
+        start: "top 55%",
+        end: "bottom 45%",
+        onEnter: () => setHostCaption(note.text, note.shape),
+        onEnterBack: () => setHostCaption(note.text, note.shape)
+      });
+    });
+  }
+
+  window.addEventListener("load", () => {
+    initHostChoreography();
+    ScrollTrigger.refresh();
+  });
+
   window.addEventListener("resize", () => {
     ScrollTrigger.refresh();
   });
